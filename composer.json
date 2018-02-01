@@ -1,0 +1,38 @@
+{
+    "name": "oat-sa/extension-tao-scheduler",
+    "description": "TAO job scheduler",
+    "authors": [
+        {
+            "name": "Open Assessment Technologies S.A.",
+            "homepage": "http://www.taotesting.com"
+        },
+        {
+            "name": "Aleh Hutnikau",
+            "role": "Developer"
+        }
+    ],
+    "homepage" : "http://www.taotesting.com",
+    "license" : "GPL-2.0-only",
+    "keywords": [
+        "tao",
+        "computer-based-assessment",
+        "oat",
+        "jobs",
+        "scheduler"
+    ],
+    "type": "tao-extension",
+    "extra": {
+        "tao-extension-name": "taoScheduler"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php" : ">=5.6",
+        "oat-sa/oatbox-extension-installer": "dev-master",
+        "hutnikau/job-scheduler": "^0.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "oat\\taoScheduler\\": ""
+        }
+    }
+}
