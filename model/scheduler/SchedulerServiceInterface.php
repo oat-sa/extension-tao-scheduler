@@ -57,9 +57,7 @@ interface SchedulerServiceInterface
 
     /**
      * Run cron jobs scheduled to period
-     * @param DateTimeInterface $from
-     * @param DateTimeInterface $to
      * @return Job[]
      */
-    public function getJobs(DateTimeInterface $from, DateTimeInterface $to);
+    public function getJobs();
 }
