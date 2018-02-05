@@ -49,11 +49,5 @@ class Updater extends common_ext_ExtensionUpdater
             );
             $this->setVersion('0.2.0');
         }
-        if ($this->isVersion('0.2.0')) {
-            $schedulerService = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
-            $schedulerService->attach('FREQ=MINUTELY;COUNT=3', new \DateTime('@1517835000'), \oat\taoProctoring\scripts\TerminatePausedAssessment::class);
-            $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $schedulerService);
-            $this->setVersion('0.2.1');
-        }
     }
 }
