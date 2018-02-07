@@ -14,24 +14,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
  *
  */
 
-namespace oat\taoScheduler\scripts\update;
-
-use common_ext_ExtensionUpdater;
+namespace oat\taoScheduler\model;
 
 /**
- * Class Updater
- *
- * @author Aleh Hutnikau <hutnikau@1pt.com>
+ * Class SchedulerException
+ * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class Updater extends common_ext_ExtensionUpdater
+class SchedulerException extends \Exception
 {
-    public function update($initialVersion)
-    {
-        $this->skip('0.1.0', '0.2.0');
-    }
+
 }
