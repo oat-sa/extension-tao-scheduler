@@ -30,7 +30,7 @@ use \oat\taoScheduler\model\job\Job;
  */
 interface SchedulerServiceInterface
 {
-    const SERVICE_ID = 'taoScheduler/scheduler';
+    const SERVICE_ID = 'taoScheduler/SchedulerService';
     const OPTION_JOBS = 'jobs';
 
     /**
