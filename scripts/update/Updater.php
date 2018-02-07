@@ -34,7 +34,9 @@ class Updater extends common_ext_ExtensionUpdater
 {
     public function update($initialVersion)
     {
-        if ($this->isVersion('0.1.0')) {
+        $this->skip('0.1.0', '0.2.0');
+
+        if ($this->isVersion('0.2.0')) {
             $this->getServiceManager()->register(
                 JobRunnerService::SERVICE_ID,
                 new JobRunnerService([
@@ -47,7 +49,7 @@ class Updater extends common_ext_ExtensionUpdater
                     SchedulerService::OPTION_JOBS => []
                 ])
             );
-            $this->setVersion('0.2.0');
+            $this->setVersion('0.3.0');
         }
     }
 }
