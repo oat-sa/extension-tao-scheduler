@@ -17,7 +17,7 @@ use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
 $schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->attach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
-    new \DateTime('now'),                       //Start date (time of first execution) 
+    new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
 ```
@@ -31,7 +31,7 @@ use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
 $schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->detach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
-    new \DateTime('now'),                       //Start date (time of first execution) 
+    new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
 ```
