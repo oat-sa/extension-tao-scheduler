@@ -73,12 +73,12 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $job = new Job('FREQ=MONTHLY;COUNT=5', new DateTime('@' . $time), 'time');
         $jobPhpCode = $job->__toPhpCode();
         eval('$unserializedJob = ' . $jobPhpCode.';');
-        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, 'time'], $unserializedJob);
+        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, 'time', []], $unserializedJob);
 
-        $job = new Job('FREQ=MONTHLY;COUNT=5', new DateTime('@' . $time), ['common_Utils', 'toPHPVariableString']);
+        $job = new Job('FREQ=MONTHLY;COUNT=5', new DateTime('@' . $time), ['common_Utils', 'toPHPVariableString'], ['foo', 'bar']);
         $jobPhpCode = $job->__toPhpCode();
         eval('$unserializedJob = ' . $jobPhpCode.';');
-        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, ['common_Utils', 'toPHPVariableString']], $unserializedJob);
+        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, ['common_Utils', 'toPHPVariableString'], ['foo', 'bar']], $unserializedJob);
 
 
         $phpSerializableCallbackMock = $this->getMockBuilder('\oat\oatbox\PhpSerializable')
@@ -93,7 +93,7 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $job = new Job('FREQ=MONTHLY;COUNT=5', new DateTime('@' . $time), [$phpSerializableCallbackMock, 'bar']);
         $jobPhpCode = $job->__toPhpCode();
         eval('$unserializedJob = ' . $jobPhpCode.';');
-        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, ['foo', 'bar']], $unserializedJob);
+        $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, ['foo', 'bar'], []], $unserializedJob);
     }
 
     /**

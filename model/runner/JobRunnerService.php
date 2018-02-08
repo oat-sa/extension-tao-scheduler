@@ -64,7 +64,7 @@ class JobRunnerService extends ConfigurableService
         );
 
         /** @var TaoScheduler $scheduler */
-        $taoSchedulerService = $this->getServiceManager()->get(TaoScheduler::SERVICE_ID);
+        $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
         /** @var TaoJob[] $taoJobs */
         $taoJobs = $taoSchedulerService->getJobs();
         $scheduler = new Scheduler();
@@ -128,19 +128,20 @@ class JobRunnerService extends ConfigurableService
     /**
      * @param JobInterface $job
      * @return array|callable
-     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
      */
     private function getCallback(JobInterface $job)
     {
         $callback = $job->getCallable();
         if (is_array($callback) && count($callback) == 2) {
             list($key, $function) = $callback;
-            if (is_string($key) && !class_exists($key) && $this->getServiceManager()->has($key)) {
-                $service = $this->getServiceManager()->get($key);
+            if (is_string($key) && !class_exists($key) && $this->getServiceLocator()->has($key)) {
+                $service = $this->getServiceLocator()->get($key);
                 $callback = [$service, $function];
             }
         }
-        return $callback;
+        return function () use($callback, $job) {
+            call_user_func_array($callback, $job->getParams());
+        };
     }
 
     /**
@@ -153,7 +154,7 @@ class JobRunnerService extends ConfigurableService
             throw new \InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
         }
         $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
-        return $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
+        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 
 }

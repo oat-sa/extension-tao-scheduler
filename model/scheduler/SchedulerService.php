@@ -37,10 +37,10 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     /**
      * @inheritdoc
      */
-    public function attach($rRule, DateTimeInterface $startTime, $callback)
+    public function attach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
         $jobs = $this->getOption(self::OPTION_JOBS);
-        $job = new Job($rRule, $startTime, $callback);
+        $job = new Job($rRule, $startTime, $callback, $params);
         $jobs[] = $job;
         $this->setOption(self::OPTION_JOBS, $jobs);
 
@@ -50,10 +50,10 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     /**
      * @inheritdoc
      */
-    public function detach($rRule, DateTimeInterface $startTime, $callback)
+    public function detach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
         $jobs = $this->getJobs();
-        $jobToRemove = new Job($rRule, $startTime, $callback);
+        $jobToRemove = new Job($rRule, $startTime, $callback, $params);
         $result = false;
         if (($key = array_search($jobToRemove, $jobs)) !== false) {
             unset($jobs[$key]);
@@ -72,7 +72,7 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
         $result = [];
         foreach ($jobs as $job) {
             if (is_array($job)) {
-                $result[] = new Job($job[0], new \DateTime('@'.$job[1]), $job[2]);
+                $result[] = new Job($job[0], new \DateTime('@'.$job[1]), $job[2], $job[3]);
             } else {
                 $result[] = $job;
             }

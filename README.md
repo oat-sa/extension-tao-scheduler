@@ -14,12 +14,13 @@ $ composer require oat-sa/extension-tao-scheduler
 
 ```
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
-$schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
+$schedulerService = $this->getServiceLocator()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->attach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
+$this->getServiceLocator()->set(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 _Note_: 
 > You can use any instance of callable type as callback except functions. In case if object is used ([$object, 'method']) make sure that object is instance of `PhpSerializable`.  
@@ -28,12 +29,13 @@ _Note_:
 
 ```
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
-$schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
+$schedulerService = $this->getServiceLocator()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->detach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
+$this->getServiceLocator()->set(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 
 All given parameters to `detach` function should be the same as in existing job.
@@ -55,6 +57,11 @@ If there is no last iteration time in the storage current timestamp will be used
 
 - Second parameter is time between Job Runner iterations. Default value is 60 seconds. This time may be longer than configured because execution of tasks found during current iteration may take some time. 
 
+###Discover tasks to me run
+
+```
+sudo -u www-data index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1518097355 1518100955 
+```
 
 ###Warnings
 

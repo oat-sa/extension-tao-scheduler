@@ -48,18 +48,25 @@ class Job implements JobInterface
     private $callback;
 
     /**
+     * @var array
+     */
+    private $params;
+
+    /**
      * Schedule an event
      *
      * @param string $rRule Recurrence rule (@see https://tools.ietf.org/html/rfc5545#section-3.3.10)
      * @param DateTimeInterface $startTime
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])
+     * @param array $params Parameters to be passed to callback
      */
-    public function __construct($rRule, DateTimeInterface $startTime, $callback)
+    public function __construct($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
         $this->rRule = $rRule;
         $this->startTime = $startTime;
         $this->callback = $callback;
+        $this->params = $params;
     }
 
     /**
@@ -87,6 +94,14 @@ class Job implements JobInterface
     }
 
     /**
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    /**
      * @inheritdoc
      */
     public function __toPhpCode()
@@ -94,7 +109,8 @@ class Job implements JobInterface
         $callbackPhpCode = $this->getPhpCode($this->getCallable());
         return '[\'' . $this->getRRule() . '\', '
             . $this->getStartTime()->getTimestamp() . ','
-            . $callbackPhpCode
+            . $callbackPhpCode . ','
+            . \common_Utils::toPHPVariableString($this->getParams())
         . ']';
     }
 

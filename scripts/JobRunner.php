@@ -29,6 +29,13 @@ use oat\oatbox\log\LoggerAwareTrait;
 
 /**
  * Class JobRunner
+ *
+ * Usage example:
+ *
+ * ```
+ * sudo -u www-data php index.php '\oat\taoScheduler\scripts\JobRunner' 1518006301 PT10S
+ * ```
+ *
  * @package oat\taoScheduler\model
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */

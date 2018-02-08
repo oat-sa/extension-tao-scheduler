@@ -45,4 +45,9 @@ interface JobInterface extends PhpSerializable
      */
     public function getStartTime();
 
+    /**
+     * @return array
+     */
+    public function getParams();
+
 }

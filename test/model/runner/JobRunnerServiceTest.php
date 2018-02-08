@@ -47,21 +47,23 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         $callbackMock->expects($this->once())
             ->method('myCallBack')
-            ->will($this->returnValue(true));
+            ->with($this->equalTo('foo'));
+        $callbackMock->method('myCallBack')->will($this->returnValue(true));
 
         $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
             ->setMethods(['myCallBack'])
             ->getMock();
         $errorCallbackMock->expects($this->once())
             ->method('myCallBack')
+            ->with($this->equalTo('foo'), $this->equalTo('bar'))
             ->will($this->returnCallback(function () {
                 throw new \Exception('foo');
             }));
 
         $serviceManager->register('callback/service', $errorCallbackMock);
 
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), [$callbackMock, 'myCallBack']);
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['callback/service', 'myCallBack']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), [$callbackMock, 'myCallBack'], ['foo']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['callback/service', 'myCallBack'], ['foo', 'bar']);
 
         /** @var common_report_Report $report */
         $report = $runnerService->run(new \DateTime('@'.$now), new \DateTime('@'.($now+1)));
