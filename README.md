@@ -60,7 +60,7 @@ If there is no last iteration time in the storage current timestamp will be used
 ###Discover tasks to me run
 
 ```
-sudo -u www-data index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1518097355 1518100955 
+sudo -u www-data php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1518097355 1518100955 
 ```
 
 ###Warnings

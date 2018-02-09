@@ -72,7 +72,7 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
         $result = [];
         foreach ($jobs as $job) {
             if (is_array($job)) {
-                $result[] = new Job($job[0], new \DateTime('@'.$job[1]), $job[2], $job[3]);
+                $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
             } else {
                 $result[] = $job;
             }

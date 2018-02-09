@@ -76,10 +76,21 @@ class SchedulerHelper extends AbstractAction
      * @return Report
      * @throws
      */
-    private function show($from, $to)
+    private function show($from = null, $to = null)
     {
-        $from = new DateTime('@'.$from);
-        $to = new DateTime('@'.$to);
+        $utcTz = new \DateTimeZone('UTC');
+        if ($from === null) {
+            $from = new DateTime('now', $utcTz);
+        } else {
+            $from = new DateTime('@'.$from, $utcTz);
+        }
+
+        if ($to === null) {
+            $to = new DateTime('now', $utcTz);
+        } else {
+            $to = new DateTime('@'.$to, $utcTz);
+        }
+
         /** @var TaoScheduler $scheduler */
         $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
         /** @var TaoJob[] $taoJobs */
@@ -89,7 +100,7 @@ class SchedulerHelper extends AbstractAction
         foreach ($taoJobs as $taoJob) {
             $rrule = new RRule($taoJob->getRrule(), $taoJob->getStartTime());
             foreach ($rrule->getRecurrences($from, $to, true) as $recurrence) {
-                $time = new DateTime('@'.$recurrence->getTimestamp());
+                $time = new DateTime('@'.$recurrence->getTimestamp(), $utcTz);
                 $phpCode = $taoJob->__toPhpCode();
                 eval('$jobArray='.$phpCode.';');
                 $count++;

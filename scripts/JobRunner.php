@@ -68,7 +68,7 @@ class JobRunner extends AbstractAction
         $this->logInfo('Run taoScheduler JobRunner');
 
         while ($this->isRunning()) {
-            $to = new DateTime('now');
+            $to = new DateTime('now', new \DateTimeZone('UTC'));
             $runnerService->run($from, $to);
             $from = clone($to);
             $from->add(new DateInterval('PT1S'));
@@ -100,7 +100,7 @@ class JobRunner extends AbstractAction
      */
     private function getSeconds(DateInterval $interval)
     {
-        $date = new \DateTimeImmutable('now');
+        $date = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $date2 = $date->add($interval);
         return $date2->getTimestamp() - $date->getTimestamp();
     }
@@ -113,13 +113,13 @@ class JobRunner extends AbstractAction
     {
         $now = time();
         if (isset($params[0]) and intval($params[0] > 0)) {
-            $this->from = new DateTime('@'.$params[0]);
+            $this->from = new DateTime('@'.$params[0], new \DateTimeZone('UTC'));
         } else {
             /** @var JobRunnerService $taoJobRunnerService */
             $taoJobRunnerService = $this->getServiceLocator()->get(JobRunnerService::SERVICE_ID);
             $lastLaunchPeriod = $taoJobRunnerService->getLastLaunchPeriod();
             if ($lastLaunchPeriod === null) {
-                $this->from = new DateTime('@'.$now);
+                $this->from = new DateTime('@'.$now, new \DateTimeZone('UTC'));
             } else {
                 $this->from = $lastLaunchPeriod->getTo()->add(new DateInterval('PT1S'));
             }
