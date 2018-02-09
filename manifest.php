@@ -24,7 +24,7 @@ return [
     'label' => 'Job Scheduler',
     'description' => 'TAO job scheduler',
     'license' => 'GPL-2.0',
-    'version' => '0.3.0',
+    'version' => '0.3.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => [
         'generis' => '>=6.7.0',

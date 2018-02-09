@@ -140,7 +140,7 @@ class JobRunnerService extends ConfigurableService
             }
         }
         return function () use($callback, $job) {
-            call_user_func_array($callback, $job->getParams());
+            return call_user_func_array($callback, $job->getParams());
         };
     }
 
