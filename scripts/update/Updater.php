@@ -22,6 +22,8 @@
 namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
+use oat\taoScheduler\model\runner\JobRunnerService;
+use oat\taoScheduler\model\scheduler\SchedulerService;
 
 /**
  * Class Updater
@@ -32,7 +34,24 @@ class Updater extends common_ext_ExtensionUpdater
 {
     public function update($initialVersion)
     {
+        $this->skip('0.1.0', '0.2.0');
 
+        if ($this->isVersion('0.2.0')) {
+            $this->getServiceManager()->register(
+                JobRunnerService::SERVICE_ID,
+                new JobRunnerService([
+                    JobRunnerService::OPTION_PERSISTENCE => 'cache',
+                ])
+            );
+            $this->getServiceManager()->register(
+                SchedulerService::SERVICE_ID,
+                new SchedulerService([
+                    SchedulerService::OPTION_JOBS => []
+                ])
+            );
+            $this->setVersion('0.3.0');
+        }
 
+        $this->skip('0.3.0', '0.3.1');
     }
 }
