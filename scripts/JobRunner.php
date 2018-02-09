@@ -65,6 +65,8 @@ class JobRunner extends AbstractAction
 
         $from = clone($this->from);
 
+        $this->logInfo('Run taoScheduler JobRunner');
+
         while ($this->isRunning()) {
             $to = new DateTime('now');
             $runnerService->run($from, $to);
@@ -72,6 +74,8 @@ class JobRunner extends AbstractAction
             $from->add(new DateInterval('PT1S'));
             sleep($this->getSeconds($this->interval));
         }
+        $this->logInfo('Shut down taoScheduler JobRunner');
+        return new Report(Report::TYPE_INFO, __('Shut down taoScheduler JobRunner'));
     }
 
     /**
