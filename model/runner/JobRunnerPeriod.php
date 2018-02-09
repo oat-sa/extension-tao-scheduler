@@ -18,36 +18,48 @@
  *
  */
 
-namespace oat\taoScheduler\model\job;
+namespace oat\taoScheduler\model\runner;
 
-use oat\oatbox\PhpSerializable;
+use DateTimeInterface;
 
 /**
- * Class Job
+ * Class JobRunnerPeriod
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-interface JobInterface extends PhpSerializable
+class JobRunnerPeriod
 {
 
-    /**
-     * @return string
-     */
-    public function getRRule();
+    /** @var DateTimeInterface */
+    private $from;
+
+    /** @var DateTimeInterface */
+    private $to;
 
     /**
-     * @return callable
+     * JobRunnerPeriod constructor.
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
      */
-    public function getCallable();
+    public function __construct(DateTimeInterface $from, DateTimeInterface $to)
+    {
+        $this->from = $from;
+        $this->to = $to;
+    }
 
     /**
-     * @return \DateTimeInterface
+     * @return DateTimeInterface
      */
-    public function getStartTime();
+    public function getFrom()
+    {
+        return $this->from;
+    }
 
     /**
-     * @return array
+     * @return DateTimeInterface
      */
-    public function getParams();
-
+    public function getTo()
+    {
+        return $this->to;
+    }
 }

@@ -30,7 +30,7 @@ use \oat\taoScheduler\model\job\Job;
  */
 interface SchedulerServiceInterface
 {
-    const SERVICE_ID = 'taoScheduler/scheduler';
+    const SERVICE_ID = 'taoScheduler/SchedulerService';
     const OPTION_JOBS = 'jobs';
 
     /**
@@ -40,9 +40,10 @@ interface SchedulerServiceInterface
      * @param DateTimeInterface $startTime
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])
+     * @param array parameters to be passed to callback
      * @return boolean
      */
-    public function attach($rRule, DateTimeInterface $startTime, $callback);
+    public function attach($rRule, DateTimeInterface $startTime, $callback, $params = []);
 
     /**
      * Remove existing event from schedule
@@ -51,9 +52,10 @@ interface SchedulerServiceInterface
      * @param DateTimeInterface $startTime
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])
+     * @param array parameters to be passed to callback
      * @return boolean
      */
-    public function detach($rRule, DateTimeInterface $startTime, $callback);
+    public function detach($rRule, DateTimeInterface $startTime, $callback, $params = []);
 
     /**
      * Run cron jobs scheduled to period
