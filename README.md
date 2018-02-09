@@ -14,13 +14,13 @@ $ composer require oat-sa/extension-tao-scheduler
 
 ```
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
-$schedulerService = $this->getServiceLocator()->get(SchedulerServiceInterface::SERVICE_ID);
+$schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->attach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceLocator()->set(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
+$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 _Note_: 
 > You can use any instance of callable type as callback except functions. In case if object is used ([$object, 'method']) make sure that object is instance of `PhpSerializable`.  
@@ -29,13 +29,13 @@ _Note_:
 
 ```
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface;
-$schedulerService = $this->getServiceLocator()->get(SchedulerServiceInterface::SERVICE_ID);
+$schedulerService = $this->getServiceManager()->get(SchedulerServiceInterface::SERVICE_ID);
 $schedulerService->detach(
     'FREQ=MONTHLY;COUNT=5',                     //Reccurrence rule (repeat monthly, 5 times)  
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceLocator()->set(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
+$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 
 All given parameters to `detach` function should be the same as in existing job.
