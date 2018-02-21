@@ -112,24 +112,6 @@ class JobRunnerService extends ConfigurableService
         $period = new JobRunnerPeriod($from, $to);
         $this->getPersistence()->set(self::PERIOD_KEY, serialize($period));
     }
-
-//    /**
-//     * @param JobInterface $job
-//     * @return array|callable
-//     */
-//    private function getCallback(JobInterface $job)
-//    {
-//        $callback = $job->getCallable();
-//        if (is_array($callback) && count($callback) == 2) {
-//            list($key, $function) = $callback;
-//            if (is_string($key) && !class_exists($key) && $this->getServiceLocator()->has($key)) {
-//                $service = $this->getServiceLocator()->get($key);
-//                $callback = [$service, $function];
-//            }
-//        }
-//        return function () use($callback, $job) {
-//            return call_user_func_array($callback, $job->getParams());
-//        };
 //    }
 
     /**
