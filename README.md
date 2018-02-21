@@ -38,6 +38,15 @@ $schedulerService->detach(
 $this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 
+Also cron notation may be used:
+```
+$schedulerService->detach(
+    '* * * * *',                                //Reccurrence rule (repeat minutely)  
+    new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
+    ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
+);
+```
+
 All given parameters to `detach` function should be the same as in existing job.
 
 ###Run JobRunner

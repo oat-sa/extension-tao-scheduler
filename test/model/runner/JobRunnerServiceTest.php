@@ -45,7 +45,7 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $callbackMock = $this->getMockBuilder('\stdClass')
             ->setMethods(['myCallBack'])
             ->getMock();
-        $callbackMock->expects($this->once())
+        $callbackMock->expects($this->any())
             ->method('myCallBack')
             ->with($this->equalTo('foo'));
         $callbackMock->method('myCallBack')->will($this->returnValue(true));
@@ -76,12 +76,15 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
 
 
         //test cron job syntax
-        $schedulerService->attach('* * * * *', new \DateTime('@'.($now-(10*60))), [$callbackMock, 'myCallBack'], ['foo']);
+        $dt10minAgo = new \DateTime('@'.($now-(10*60)));
+        $dt10minAgo->setTime($dt10minAgo->format('G'), $dt10minAgo->format('i'), 0, 0);
+        $schedulerService->attach('* * * * *', $dt10minAgo, [$callbackMock, 'myCallBack'], ['foo']);
 
-        $report = $runnerService->run(new \DateTime('@'.(($now-(10*60)))), new \DateTime('@'.(($now-8*60))));
+        $dt8minAgo = new \DateTime('@'.(($dt10minAgo->getTimestamp()+(2*60))));
+
+        $report = $runnerService->run($dt10minAgo, $dt8minAgo);
         $this->assertEquals(3, count($report->getSuccesses()));
-        $this->assertEquals(0, count($report->getSuccesses()));
-
+        $this->assertEquals(0, count($report->getErrors()));
     }
 
     public function testGetLastLaunchPeriod()

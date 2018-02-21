@@ -22,6 +22,7 @@ namespace oat\taoScheduler\model\scheduler;
 
 use DateTimeInterface;
 use \oat\taoScheduler\model\job\Job;
+use oat\taoScheduler\model\action\ActionInterface;
 
 /**
  * Interface SchedulerServiceInterface
@@ -31,7 +32,6 @@ use \oat\taoScheduler\model\job\Job;
 interface SchedulerServiceInterface
 {
     const SERVICE_ID = 'taoScheduler/SchedulerService';
-    const OPTION_JOBS = 'jobs';
 
     /**
      * Schedule an event
@@ -62,4 +62,11 @@ interface SchedulerServiceInterface
      * @return Job[]
      */
     public function getJobs();
+
+    /**
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
+     * @return ActionInterface[]
+     */
+    public function getScheduledActions(DateTimeInterface $from, DateTimeInterface $to);
 }

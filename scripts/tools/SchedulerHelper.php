@@ -91,33 +91,24 @@ class SchedulerHelper extends AbstractAction
             $to = new DateTime('@'.$to, $utcTz);
         }
 
-        /** @var TaoScheduler $scheduler */
+        /** @var TaoScheduler $taoSchedulerService */
         $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
-        /** @var TaoJob[] $taoJobs */
-        $taoJobs = $taoSchedulerService->getJobs();
+        $actions = $taoSchedulerService->getScheduledActions($from, $to);
         $report = new Report(Report::TYPE_INFO, 'Tasks scheduled from ' . $from->format(DateTime::ISO8601) . ' to ' . $to->format(DateTime::ISO8601));
         $count = 0;
-        foreach ($taoJobs as $taoJob) {
-            $rrule = new RRule($taoJob->getRrule(), $taoJob->getStartTime());
-            foreach ($rrule->getRecurrences($from, $to, true) as $recurrence) {
-                $time = new DateTime('@'.$recurrence->getTimestamp(), $utcTz);
-                $phpCode = $taoJob->__toPhpCode();
-                eval('$jobArray='.$phpCode.';');
-                $count++;
-                $report->add(
-                    new Report(
-                        Report::TYPE_INFO,
-                        'Task #' . $count . ':' . PHP_EOL .
-                        '  Execution Time: ' . $time->format(DateTime::ISO8601) . PHP_EOL .
-                        '  Callback: ' . \common_Utils::toPHPVariableString($jobArray[2]) . PHP_EOL .
-                        '  Params: ' . \common_Utils::toPHPVariableString($jobArray[3]) . PHP_EOL .
-                        '  Recurrence rule: ' . \common_Utils::toPHPVariableString($jobArray[0]) . PHP_EOL .
-                        '  Start Time: ' . \common_Utils::toPHPVariableString($jobArray[1]) . PHP_EOL
-                    )
-                );
-            }
-
+        foreach ($actions as $action) {
+            $count++;
+            $report->add(
+                new Report(
+                    Report::TYPE_INFO,
+                    'Task #' . $count . ':' . PHP_EOL .
+                    '  Execution Time: ' . $action->getStartTime()->format(DateTime::ISO8601) . PHP_EOL .
+                    '  Callback: ' . \common_Utils::toPHPVariableString($action->getCallback()) . PHP_EOL .
+                    '  Params: ' . \common_Utils::toPHPVariableString($action->getParams()) . PHP_EOL
+                )
+            );
         }
+
         $report->add(new Report(Report::TYPE_INFO, $count . ' tasks scheduled'));
         return $report;
     }
