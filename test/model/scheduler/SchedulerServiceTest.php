@@ -85,7 +85,6 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
         $scheduler->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$time), 'foo/baz');
 
         $this->assertEquals(2, count($scheduler->getJobs()));
-
     }
 
     public function testGetScheduledActions()

@@ -67,9 +67,9 @@ class JobRunnerService extends ConfigurableService
             try {
                 $actionResult = $action();
                 if (!$actionResult instanceof Report) {
-                    Report::createSuccess(json_encode($actionResult));
+                    $actionResult = is_string($actionResult) ? $actionResult : Report::createSuccess(json_encode($actionResult));
                 }
-                $reports[] = $action();
+                $reports[] = $actionResult;
             } catch (\Exception $e) {
                 $reports[] = Report::createFailure($e->getMessage());
                 $this->logError('Executions of scheduled task failed: ' . $e->getMessage());
