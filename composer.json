@@ -28,7 +28,7 @@
     "require": {
         "php" : ">=5.6",
         "oat-sa/oatbox-extension-installer": "dev-master",
-        "hutnikau/job-scheduler": "^0.2"
+        "hutnikau/job-scheduler": "^0.3"
     },
     "autoload": {
         "psr-4": {

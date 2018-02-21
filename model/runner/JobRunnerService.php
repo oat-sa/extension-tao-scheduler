@@ -69,10 +69,7 @@ class JobRunnerService extends ConfigurableService
         $taoJobs = $taoSchedulerService->getJobs();
         $scheduler = new Scheduler();
         foreach ($taoJobs as $taoJob) {
-            $internalJob = new Job(
-                new RRule($taoJob->getRrule(), $taoJob->getStartTime()),
-                $this->getCallback($taoJob)
-            );
+            $internalJob = Job::createFromString($taoJob->getRrule(), $taoJob->getStartTime(), $this->getCallback($taoJob));
             $scheduler->addJob($internalJob);
         }
         $jobRunner = new JobRunner();

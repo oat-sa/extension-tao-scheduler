@@ -73,6 +73,15 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $report = $runnerService->run(new \DateTime('@'.($now+2)), new \DateTime('@'.($now+3)));
         $this->assertEquals(1, count($report->getErrors()));
         $this->assertEquals(0, count($report->getSuccesses()));
+
+
+        //test cron job syntax
+        $schedulerService->attach('* * * * *', new \DateTime('@'.($now-(10*60))), [$callbackMock, 'myCallBack'], ['foo']);
+
+        $report = $runnerService->run(new \DateTime('@'.(($now-(10*60)))), new \DateTime('@'.(($now-8*60))));
+        $this->assertEquals(3, count($report->getSuccesses()));
+        $this->assertEquals(0, count($report->getSuccesses()));
+
     }
 
     public function testGetLastLaunchPeriod()
@@ -119,6 +128,7 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
 
         $serviceManager->register(SchedulerService::SERVICE_ID, $scheduler);
         $serviceManager->register(JobRunnerService::SERVICE_ID, $runner);
+        $serviceManager->register('generis/log', new \oat\oatbox\log\LoggerService([]));
         $serviceManager->register(common_persistence_Manager::SERVICE_ID, new common_persistence_Manager([
             'persistences' => [
                 'test' => [
