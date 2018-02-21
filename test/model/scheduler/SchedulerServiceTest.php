@@ -19,7 +19,7 @@
  */
 namespace oat\taoScheduler\test\model\scheduler;
 
-use oat\dtms\DateTime;
+use DateTime;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\action\ActionInterface;
