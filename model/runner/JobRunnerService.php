@@ -65,7 +65,11 @@ class JobRunnerService extends ConfigurableService
 
         foreach ($actions as $action) {
             try {
-                $reports[] = Report::createSuccess($action());
+                $actionResult = $action();
+                if (!$actionResult instanceof Report) {
+                    Report::createSuccess(json_encode($actionResult));
+                }
+                $reports[] = $action();
             } catch (\Exception $e) {
                 $reports[] = Report::createFailure($e->getMessage());
                 $this->logError('Executions of scheduled task failed: ' . $e->getMessage());
@@ -112,7 +116,6 @@ class JobRunnerService extends ConfigurableService
         $period = new JobRunnerPeriod($from, $to);
         $this->getPersistence()->set(self::PERIOD_KEY, serialize($period));
     }
-//    }
 
     /**
      * @return \common_persistence_KeyValuePersistence

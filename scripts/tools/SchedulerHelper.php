@@ -24,8 +24,6 @@ use oat\oatbox\extension\AbstractAction;
 use DateTime;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface as TaoScheduler;
-use oat\taoScheduler\model\job\JobInterface as TaoJob;
-use Scheduler\Job\RRule;
 use common_report_Report as Report;
 
 /**

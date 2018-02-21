@@ -2,7 +2,6 @@
 
 namespace oat\taoScheduler\model\action;
 
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use DateTimeInterface;
 
@@ -11,7 +10,7 @@ use DateTimeInterface;
  * @package Task
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class Action implements ActionInterface, ServiceLocatorAwareInterface
+class Action implements ActionInterface
 {
 
     use ServiceLocatorAwareTrait;
@@ -22,7 +21,6 @@ class Action implements ActionInterface, ServiceLocatorAwareInterface
 
     /**
      * Action constructor.
-     * @param DateTimeInterface $startTime
      * @param $callback
      * @param mixed $params
      */

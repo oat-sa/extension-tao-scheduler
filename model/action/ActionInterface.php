@@ -20,12 +20,14 @@
 
 namespace oat\taoScheduler\model\action;
 
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+
 /**
  * Interface ActionInterface
  * @package oat\taoScheduler\model\action
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-interface ActionInterface
+interface ActionInterface extends ServiceLocatorAwareInterface
 {
     /**
      * @return mixed
