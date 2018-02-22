@@ -38,7 +38,7 @@ $schedulerService->detach(
 
 Also cron notation may be used:
 ```
-$schedulerService->detach(
+$schedulerService->attach(
     '* * * * *',                                //Reccurrence rule (repeat minutely)  
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
