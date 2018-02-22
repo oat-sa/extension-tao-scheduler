@@ -24,7 +24,7 @@ return [
     'label' => 'Job Scheduler',
     'description' => 'TAO job scheduler',
     'license' => 'GPL-2.0',
-    'version' => '0.4.0',
+    'version' => '0.5.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => [
         'generis' => '>=6.7.0',
@@ -35,7 +35,9 @@ return [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSchedulerManager', ['ext'=>'taoScheduler']],
     ],
     'install' => [
-        'php' => []
+        'php' => [
+            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
+        ]
     ],
     'uninstall' => [
 

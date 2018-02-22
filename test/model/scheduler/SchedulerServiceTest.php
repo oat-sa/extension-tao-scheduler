@@ -19,17 +19,19 @@
  */
 namespace oat\taoScheduler\test\model\scheduler;
 
-use oat\dtms\DateTime;
+use DateTime;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\action\ActionInterface;
+use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
+use oat\tao\test\TaoPhpUnitTestRunner;
 
 /**
  * Class SchedulerService
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
+class SchedulerServiceTest extends TaoPhpUnitTestRunner
 {
 
     protected function tearDown()
@@ -50,9 +52,9 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
     {
         $time = time();
         $scheduler = $this->getInstance();
-        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
+        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@' . $time), 'foo/bar');
 
-        $jobs = $scheduler->getOption(SchedulerService::OPTION_JOBS);
+        $jobs = $scheduler->getJobs();
         $this->assertEquals(1, count($jobs));
         $this->assertTrue($jobs[0] instanceof \oat\taoScheduler\model\job\Job);
         $this->assertEquals('FREQ=MONTHLY;COUNT=5', $jobs[0]->getRRule());
@@ -65,12 +67,12 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
         $time = time();
         $scheduler = $this->getInstance();
 
-        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
-        $jobs = $scheduler->getOption(SchedulerService::OPTION_JOBS);
+        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@' . $time), 'foo/bar');
+        $jobs = $scheduler->getJobs();
         $this->assertEquals(1, count($jobs));
 
-        $scheduler->detach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
-        $jobs = $scheduler->getOption(SchedulerService::OPTION_JOBS);
+        $scheduler->detach('FREQ=MONTHLY;COUNT=5', new \DateTime('@' . $time), 'foo/bar');
+        $jobs = $scheduler->getJobs();
         $this->assertEquals(0, count($jobs));
     }
 
@@ -81,8 +83,8 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(0, count($scheduler->getJobs()));
 
-        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
-        $scheduler->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$time), 'foo/baz');
+        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@' . $time), 'foo/bar');
+        $scheduler->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@' . $time), 'foo/baz');
 
         $this->assertEquals(2, count($scheduler->getJobs()));
     }
@@ -93,19 +95,10 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
         $dt = new DateTime('now');
         $dt->setTime($dt->format('G'), $dt->format('i'), 0, 0);
 
-        $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
-            ->getMock();
-        $callbackMock->expects($this->any())
-            ->method('myCallBack')
-            ->with($this->equalTo('foo'));
-        $callbackMock->method('myCallBack')->will($this->returnValue(true));
+        $scheduler->attach('FREQ=MINUTELY;COUNT=5', $dt, ['\DateTime', 'createFromFormat'], ['j-M-Y', '22-Feb-2018']);
+        $scheduler->attach('* * * * *', $dt, ['\DateTime', 'createFromFormat'], ['j-M-Y', '22-Feb-2018']);
 
-
-        $scheduler->attach('FREQ=MINUTELY;COUNT=5', $dt, [$callbackMock, 'myCallBack']);
-        $scheduler->attach('* * * * *', $dt, [$callbackMock, 'myCallBack']);
-
-        $actions = $scheduler->getScheduledActions($dt, new DateTime('@'.($dt->getTimestamp()+(2*60))));
+        $actions = $scheduler->getScheduledActions($dt, new DateTime('@' . ($dt->getTimestamp() + (2 * 60))));
 
         $this->assertEquals(6, count($actions));
 
@@ -116,20 +109,23 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @return \oat\taoScheduler\model\scheduler\SchedulerService
+     * @throws
      */
     private function getInstance()
     {
-        $scheduler = new SchedulerService([]);
-        $params = [
-            'dir' => __DIR__ . DIRECTORY_SEPARATOR . 'cache',
-            'humanReadable' => true
-        ];
-        $driver = new \common_persistence_PhpFileDriver();
-        $driver->connect('test', $params);
-        $config = new \common_persistence_KeyValuePersistence([], $driver);
+        $scheduler = new SchedulerService([
+            SchedulerService::OPTION_JOBS_STORAGE => SchedulerRdsStorage::class,
+            SchedulerService::OPTION_JOBS_STORAGE_PARAMS => ['test_scheduler'],
+
+        ]);
+
+        $persistenceManager = $this->getSqlMock('test_scheduler');
+        $persistence = $persistenceManager->getPersistenceById('test_scheduler');
+        SchedulerRdsStorage::install($persistence);
+        $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+        $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
         return $scheduler;
     }
-
 }

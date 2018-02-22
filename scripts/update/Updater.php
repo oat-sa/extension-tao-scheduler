@@ -22,8 +22,10 @@
 namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
+use oat\taoScheduler\model\job\Job;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
+use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 
 /**
  * Class Updater
@@ -53,5 +55,25 @@ class Updater extends common_ext_ExtensionUpdater
         }
 
         $this->skip('0.3.0', '0.4.0');
+
+        if ($this->isVersion('0.4.0')) {
+            $persistenceManager = $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID);
+            /** @var SchedulerService $scheduler */
+            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
+            $jobs = $scheduler->getOption('jobs');
+            $persistence = $persistenceManager->getPersistenceById('default');
+            SchedulerRdsStorage::install($persistence);
+            $scheduler->setOptions([
+                SchedulerService::OPTION_JOBS_STORAGE => SchedulerRdsStorage::class,
+                SchedulerService::OPTION_JOBS_STORAGE_PARAMS => ['default'],
+            ]);
+
+            foreach ($jobs as $job) {
+                $scheduler->attach($job[0], new \DateTime('@'.$job[1]), $job[2], $job[3]);
+            }
+
+            $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $scheduler);
+            $this->setVersion('0.5.0');
+        }
     }
 }
