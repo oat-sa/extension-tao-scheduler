@@ -49,4 +49,10 @@ interface SchedulerStorageInterface extends ServiceLocatorAwareInterface
      * @return JobInterface[]
      */
     public function getJobs();
+
+    /**
+     * @param $persistence
+     * @return mixed
+     */
+    public static function install($persistence);
 }

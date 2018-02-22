@@ -71,19 +71,6 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     public function getJobs()
     {
         return $this->getStorage()->getJobs();
-//        $jobs = $this->getOption(self::OPTION_JOBS);
-//        $result = [];
-//        if ($jobs === null) {
-//            $jobs = [];
-//        }
-//        foreach ($jobs as $job) {
-//            if (is_array($job)) {
-//                $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
-//            } else {
-//                $result[] = $job;
-//            }
-//        }
-//        return $result;
     }
 
     /**

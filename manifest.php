@@ -35,7 +35,9 @@ return [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSchedulerManager', ['ext'=>'taoScheduler']],
     ],
     'install' => [
-        'php' => []
+        'php' => [
+            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
+        ]
     ],
     'uninstall' => [
 
