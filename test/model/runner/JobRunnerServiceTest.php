@@ -43,24 +43,6 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $schedulerService = $serviceManager->get(SchedulerService::SERVICE_ID);
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-//        $callbackMock = $this->getMockBuilder('\stdClass')
-//            ->setMethods(['myCallBack'])
-//            ->getMock();
-//        $callbackMock->expects($this->any())
-//            ->method('myCallBack')
-//            ->with($this->equalTo('foo'));
-//        $callbackMock->method('myCallBack')->will($this->returnValue(true));
-//
-//        $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
-//            ->setMethods(['myCallBack'])
-//            ->getMock();
-//        $errorCallbackMock->expects($this->once())
-//            ->method('myCallBack')
-//            ->with($this->equalTo('foo'), $this->equalTo('bar'))
-//            ->will($this->returnCallback(function () {
-//                throw new \Exception('foo');
-//            }));
-
         $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), ['callback/mock', 'myCallBack'], ['foo']);
         $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['errorcallback/mock', 'myCallBack'], ['foo', 'bar']);
 
