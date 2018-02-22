@@ -20,7 +20,6 @@ $schedulerService->attach(
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 _Note_: 
 > You can use any instance of callable type as callback except functions. In case if object is used ([$object, 'method']) make sure that object is instance of `PhpSerializable`.  
@@ -35,7 +34,6 @@ $schedulerService->detach(
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 
 Also cron notation may be used:

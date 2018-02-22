@@ -34,21 +34,25 @@ use oat\taoScheduler\model\action\Action;
  */
 class SchedulerService extends ConfigurableService implements SchedulerServiceInterface
 {
+    /**
+     * @deprecated
+     */
     const OPTION_JOBS = 'jobs';
+    const OPTION_JOBS_STORAGE = 'jobs_storage';
+    const OPTION_JOBS_STORAGE_PARAMS = 'jobs_storage_params';
 
     use LoggerAwareTrait;
+
+    /** @var SchedulerStorageInterface */
+    private $storage;
 
     /**
      * @inheritdoc
      */
     public function attach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
-        $jobs = $this->getOption(self::OPTION_JOBS);
         $job = new Job($rRule, $startTime, $callback, $params);
-        $jobs[] = $job;
-        $this->setOption(self::OPTION_JOBS, $jobs);
-
-        return true;
+        return $this->getStorage()->add($job);
     }
 
     /**
@@ -56,35 +60,30 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
      */
     public function detach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
-        $jobs = $this->getJobs();
         $jobToRemove = new Job($rRule, $startTime, $callback, $params);
-        $result = false;
-        if (($key = array_search($jobToRemove, $jobs)) !== false) {
-            unset($jobs[$key]);
-        }
-        $this->setOption(self::OPTION_JOBS, $jobs);
-        return $result;
+        return $this->getStorage()->remove($jobToRemove);
     }
 
     /**
      * Return array of all the scheduled jobs
-     * @return Jobs[]
+     * @return Job[]
      */
     public function getJobs()
     {
-        $jobs = $this->getOption(self::OPTION_JOBS);
-        $result = [];
-        if ($jobs === null) {
-            $jobs = [];
-        }
-        foreach ($jobs as $job) {
-            if (is_array($job)) {
-                $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
-            } else {
-                $result[] = $job;
-            }
-        }
-        return $result;
+        return $this->getStorage()->getJobs();
+//        $jobs = $this->getOption(self::OPTION_JOBS);
+//        $result = [];
+//        if ($jobs === null) {
+//            $jobs = [];
+//        }
+//        foreach ($jobs as $job) {
+//            if (is_array($job)) {
+//                $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
+//            } else {
+//                $result[] = $job;
+//            }
+//        }
+//        return $result;
     }
 
     /**
@@ -126,5 +125,19 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
         $action = new Action($callable, $params);
         $action->setServiceLocator($this->getServiceLocator());
         return $action;
+    }
+
+    /**
+     * @return SchedulerStorageInterface
+     */
+    private function getStorage()
+    {
+        if ($this->storage === null) {
+            $storageClass = $this->getOption(self::OPTION_JOBS_STORAGE);
+            $storageParams = $this->getOption(self::OPTION_JOBS_STORAGE_PARAMS);
+            $this->storage = new $storageClass(...$storageParams);
+            $this->storage->setServiceLocator($this->getServiceLocator());
+        }
+        return $this->storage;
     }
 }
