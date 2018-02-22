@@ -19,8 +19,10 @@
  */
 namespace oat\taoScheduler\test\model\scheduler;
 
+use oat\dtms\DateTime;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\oatbox\service\ServiceManager;
+use oat\taoScheduler\model\action\ActionInterface;
 
 /**
  * Class SchedulerService
@@ -70,6 +72,46 @@ class SchedulerServiceTest extends \PHPUnit_Framework_TestCase
         $scheduler->detach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
         $jobs = $scheduler->getOption(SchedulerService::OPTION_JOBS);
         $this->assertEquals(0, count($jobs));
+    }
+
+    public function testGetJobs()
+    {
+        $scheduler = $this->getInstance();
+        $time = time();
+
+        $this->assertEquals(0, count($scheduler->getJobs()));
+
+        $scheduler->attach('FREQ=MONTHLY;COUNT=5', new \DateTime('@'.$time), 'foo/bar');
+        $scheduler->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$time), 'foo/baz');
+
+        $this->assertEquals(2, count($scheduler->getJobs()));
+    }
+
+    public function testGetScheduledActions()
+    {
+        $scheduler = $this->getInstance();
+        $dt = new DateTime('now');
+        $dt->setTime($dt->format('G'), $dt->format('i'), 0, 0);
+
+        $callbackMock = $this->getMockBuilder('\stdClass')
+            ->setMethods(['myCallBack'])
+            ->getMock();
+        $callbackMock->expects($this->any())
+            ->method('myCallBack')
+            ->with($this->equalTo('foo'));
+        $callbackMock->method('myCallBack')->will($this->returnValue(true));
+
+
+        $scheduler->attach('FREQ=MINUTELY;COUNT=5', $dt, [$callbackMock, 'myCallBack']);
+        $scheduler->attach('* * * * *', $dt, [$callbackMock, 'myCallBack']);
+
+        $actions = $scheduler->getScheduledActions($dt, new DateTime('@'.($dt->getTimestamp()+(2*60))));
+
+        $this->assertEquals(6, count($actions));
+
+        foreach ($actions as $action) {
+            $this->assertTrue($action instanceof ActionInterface);
+        }
     }
 
     /**

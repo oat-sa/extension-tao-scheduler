@@ -22,17 +22,11 @@ namespace oat\taoScheduler\model\runner;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\log\LoggerAwareTrait;
-use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface as TaoScheduler;
-use oat\taoScheduler\model\job\JobInterface as TaoJob;
 use common_report_Report;
-use Scheduler\JobRunner\JobRunner;
-use Scheduler\Job\RRule;
-use Scheduler\Job\Job;
-use Scheduler\Action\Report;
-use Scheduler\Scheduler;
 use DateTimeInterface;
 use DateTime;
+use common_report_Report as Report;
 
 /**
  * Class JobRunner
@@ -47,6 +41,7 @@ class JobRunnerService extends ConfigurableService
     const OPTION_PERSISTENCE = 'persistence';
     const PERIOD_KEY = 'taoScheduler:lastLaunchPeriod';
 
+    /** @var Report */
     private $report;
 
     /**
@@ -59,25 +54,29 @@ class JobRunnerService extends ConfigurableService
     {
         $this->updateLastLaunchPeriod($from, $to);
         $this->logInfo('Run tasks scheduled from ' . $from->format(DateTime::ISO8601) . ' to ' . $to->format(DateTime::ISO8601));
-        $this->report = common_report_Report::createInfo(
+        $this->report = Report::createInfo(
             'Run tasks scheduled from ' . $from->format(DateTime::ISO8601) . ' to ' . $to->format(DateTime::ISO8601)
         );
 
-        /** @var TaoScheduler $scheduler */
+        /** @var TaoScheduler $taoSchedulerService */
         $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
-        /** @var TaoJob[] $taoJobs */
-        $taoJobs = $taoSchedulerService->getJobs();
-        $scheduler = new Scheduler();
-        foreach ($taoJobs as $taoJob) {
-            $internalJob = new Job(
-                new RRule($taoJob->getRrule(), $taoJob->getStartTime()),
-                $this->getCallback($taoJob)
-            );
-            $scheduler->addJob($internalJob);
+        $actions = $taoSchedulerService->getScheduledActions($from, $to);
+        $reports = [];
+
+        foreach ($actions as $action) {
+            try {
+                $actionResult = $action();
+                if (!$actionResult instanceof Report) {
+                    $actionResult = is_string($actionResult) ? $actionResult : Report::createSuccess(json_encode($actionResult));
+                }
+                $reports[] = $actionResult;
+            } catch (\Exception $e) {
+                $reports[] = Report::createFailure($e->getMessage());
+                $this->logError('Executions of scheduled task failed: ' . $e->getMessage());
+            }
         }
-        $jobRunner = new JobRunner();
-        $results = $jobRunner->run($scheduler, $from, $to, true);
-        $this->processResults($results);
+
+        $this->processResults($reports);
 
         return $this->report;
     }
@@ -96,19 +95,12 @@ class JobRunnerService extends ConfigurableService
     }
 
     /**
-     * @param Report[] $results
+     * @param Report[] $reports
+     * @throws
      */
-    private function processResults(array $results = [])
+    private function processResults(array $reports = [])
     {
-        foreach ($results as $result) {
-            if ($result->getResult() instanceof common_report_Report) {
-                $report = $result->getResult();
-            } else  {
-                $report = new common_report_Report(
-                    $result->getType() === Report::TYPE_SUCCESS ? common_report_Report::TYPE_SUCCESS : common_report_Report::TYPE_ERROR,
-                    is_string($result->getResult()) ? $result->getResult() : json_encode($result->getResult())
-                );
-            }
+        foreach ($reports as $report) {
             $this->report->add($report);
             $this->logInfo($report->getMessage());
         }
@@ -123,25 +115,6 @@ class JobRunnerService extends ConfigurableService
     {
         $period = new JobRunnerPeriod($from, $to);
         $this->getPersistence()->set(self::PERIOD_KEY, serialize($period));
-    }
-
-    /**
-     * @param JobInterface $job
-     * @return array|callable
-     */
-    private function getCallback(JobInterface $job)
-    {
-        $callback = $job->getCallable();
-        if (is_array($callback) && count($callback) == 2) {
-            list($key, $function) = $callback;
-            if (is_string($key) && !class_exists($key) && $this->getServiceLocator()->has($key)) {
-                $service = $this->getServiceLocator()->get($key);
-                $callback = [$service, $function];
-            }
-        }
-        return function () use($callback, $job) {
-            return call_user_func_array($callback, $job->getParams());
-        };
     }
 
     /**

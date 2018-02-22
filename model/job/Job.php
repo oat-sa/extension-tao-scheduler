@@ -55,7 +55,7 @@ class Job implements JobInterface
     /**
      * Schedule an event
      *
-     * @param string $rRule Recurrence rule (@see https://tools.ietf.org/html/rfc5545#section-3.3.10)
+     * @param string $rRule Recurrence rule: iCalendar (@see https://tools.ietf.org/html/rfc5545#section-3.3.10) or Cron syntax
      * @param DateTimeInterface $startTime
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])

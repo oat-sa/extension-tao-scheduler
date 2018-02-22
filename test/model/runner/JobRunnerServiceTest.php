@@ -45,7 +45,7 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $callbackMock = $this->getMockBuilder('\stdClass')
             ->setMethods(['myCallBack'])
             ->getMock();
-        $callbackMock->expects($this->once())
+        $callbackMock->expects($this->any())
             ->method('myCallBack')
             ->with($this->equalTo('foo'));
         $callbackMock->method('myCallBack')->will($this->returnValue(true));
@@ -73,6 +73,18 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $report = $runnerService->run(new \DateTime('@'.($now+2)), new \DateTime('@'.($now+3)));
         $this->assertEquals(1, count($report->getErrors()));
         $this->assertEquals(0, count($report->getSuccesses()));
+
+
+        //test cron job syntax
+        $dt10minAgo = new \DateTime('@'.($now-(10*60)));
+        $dt10minAgo->setTime($dt10minAgo->format('G'), $dt10minAgo->format('i'), 0, 0);
+        $schedulerService->attach('* * * * *', $dt10minAgo, [$callbackMock, 'myCallBack'], ['foo']);
+
+        $dt8minAgo = new \DateTime('@'.(($dt10minAgo->getTimestamp()+(2*60))));
+
+        $report = $runnerService->run($dt10minAgo, $dt8minAgo);
+        $this->assertEquals(3, count($report->getSuccesses()));
+        $this->assertEquals(0, count($report->getErrors()));
     }
 
     public function testGetLastLaunchPeriod()
@@ -119,6 +131,7 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
 
         $serviceManager->register(SchedulerService::SERVICE_ID, $scheduler);
         $serviceManager->register(JobRunnerService::SERVICE_ID, $runner);
+        $serviceManager->register('generis/log', new \oat\oatbox\log\LoggerService([]));
         $serviceManager->register(common_persistence_Manager::SERVICE_ID, new common_persistence_Manager([
             'persistences' => [
                 'test' => [

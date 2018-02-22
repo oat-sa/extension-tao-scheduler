@@ -23,6 +23,9 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoScheduler\model\job\Job;
 use DateTimeInterface;
 use oat\oatbox\log\LoggerAwareTrait;
+use Scheduler\Scheduler;
+use Scheduler\Job\Job as SchedulerJob;
+use oat\taoScheduler\model\action\Action;
 
 /**
  * Class SchedulerService
@@ -31,6 +34,7 @@ use oat\oatbox\log\LoggerAwareTrait;
  */
 class SchedulerService extends ConfigurableService implements SchedulerServiceInterface
 {
+    const OPTION_JOBS = 'jobs';
 
     use LoggerAwareTrait;
 
@@ -70,6 +74,9 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     {
         $jobs = $this->getOption(self::OPTION_JOBS);
         $result = [];
+        if ($jobs === null) {
+            $jobs = [];
+        }
         foreach ($jobs as $job) {
             if (is_array($job)) {
                 $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
@@ -78,5 +85,46 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
             }
         }
         return $result;
+    }
+
+    /**
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
+     * @return \oat\taoScheduler\model\action\ActionInterface[]
+     */
+    public function getScheduledActions(DateTimeInterface $from, DateTimeInterface $to)
+    {
+        $result = [];
+
+        /** @var Job[] $taoJobs */
+        $taoJobs = $this->getJobs();
+        $scheduler = new Scheduler();
+        foreach ($taoJobs as $taoJob) {
+            $action = $this->getAction($taoJob->getCallable(), $taoJob->getParams());
+            $schedulerJob = SchedulerJob::createFromString($taoJob->getRrule(), $taoJob->getStartTime(), $action);
+            $scheduler->addJob($schedulerJob);
+        }
+        $scheduledActions = $scheduler->getIterator($from, $to, true);
+
+        foreach ($scheduledActions as $scheduledAction) {
+            /** @var Action $action */
+            $action = clone($scheduledAction->getJob()->getCallable());
+            $action->setStartTime($scheduledAction->getTime());
+            $result[] = $action;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $callable
+     * @param $params
+     * @return Action
+     */
+    private function getAction($callable, $params)
+    {
+        $action = new Action($callable, $params);
+        $action->setServiceLocator($this->getServiceLocator());
+        return $action;
     }
 }
