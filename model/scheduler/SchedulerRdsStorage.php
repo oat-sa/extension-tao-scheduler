@@ -73,7 +73,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     {
         $json = json_encode($job);
         if (!$this->isExists($job)) {
-            throw new SchedulerException('Job does not already exist');
+            throw new SchedulerException('Job does not exist');
         }
         $queryBuilder = $this->getPersistence()->getPlatForm()->getQueryBuilder();
         $queryBuilder->delete(self::TABLE_NAME);
