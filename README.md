@@ -20,8 +20,17 @@ $schedulerService->attach(
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
+
+Also cron notation may be used:
+```
+$schedulerService->attach(
+    '* * * * *',                                //Reccurrence rule (repeat minutely)  
+    new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
+    ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
+);
+```
+
 _Note_: 
 > You can use any instance of callable type as callback except functions. In case if object is used ([$object, 'method']) make sure that object is instance of `PhpSerializable`.  
 
@@ -35,7 +44,6 @@ $schedulerService->detach(
     new \DateTime('2017-12-12 20:00:00'),       //Start date (time of first execution) 
     ['taoExtension/ServiceName', 'methodName']  //Callback to be called.
 );
-$this->getServiceManager()->register(SchedulerServiceInterface::SERVICE_ID, $schedulerService);
 ```
 
 All given parameters to `detach` function should be the same as in existing job.
@@ -67,4 +75,5 @@ sudo -u www-data php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper'
 
 1. Current version of scheduler cannot be in parallel in two or more instances.
 2. Please do not schedule tasks which execution of which requires a lot of resource or take long time. All the time/resources consuming tasks should create appropriate tasks in the task queue. Ideally scheduled tasks should do nothing except adding tasks to the task queue.
- 
+3. Use cron syntax in case if number of occurrences is not limited.
+4. iCalendar syntax is more flexible but in case of large or unlimited number of repeats there may be performance issues. By default limit of repeats is 732. More information: https://github.com/simshaun/recurr

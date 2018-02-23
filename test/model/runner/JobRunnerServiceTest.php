@@ -24,15 +24,16 @@ use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\runner\JobRunnerPeriod;
 use oat\oatbox\service\ServiceManager;
-use common_persistence_Manager;
 use common_report_Report;
+use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
+use oat\tao\test\TaoPhpUnitTestRunner;
 
 /**
  * Class JobRunnerServiceTest
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
+class JobRunnerServiceTest extends TaoPhpUnitTestRunner
 {
 
     public function testRun()
@@ -42,28 +43,8 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $schedulerService = $serviceManager->get(SchedulerService::SERVICE_ID);
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-        $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
-            ->getMock();
-        $callbackMock->expects($this->once())
-            ->method('myCallBack')
-            ->with($this->equalTo('foo'));
-        $callbackMock->method('myCallBack')->will($this->returnValue(true));
-
-        $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
-            ->setMethods(['myCallBack'])
-            ->getMock();
-        $errorCallbackMock->expects($this->once())
-            ->method('myCallBack')
-            ->with($this->equalTo('foo'), $this->equalTo('bar'))
-            ->will($this->returnCallback(function () {
-                throw new \Exception('foo');
-            }));
-
-        $serviceManager->register('callback/service', $errorCallbackMock);
-
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), [$callbackMock, 'myCallBack'], ['foo']);
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['callback/service', 'myCallBack'], ['foo', 'bar']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), ['callback/mock', 'myCallBack'], ['foo']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['errorcallback/mock', 'myCallBack'], ['foo', 'bar']);
 
         /** @var common_report_Report $report */
         $report = $runnerService->run(new \DateTime('@'.$now), new \DateTime('@'.($now+1)));
@@ -73,6 +54,18 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         $report = $runnerService->run(new \DateTime('@'.($now+2)), new \DateTime('@'.($now+3)));
         $this->assertEquals(1, count($report->getErrors()));
         $this->assertEquals(0, count($report->getSuccesses()));
+
+
+        //test cron job syntax
+        $dt10minAgo = new \DateTime('@'.($now-(10*60)));
+        $dt10minAgo->setTime($dt10minAgo->format('G'), $dt10minAgo->format('i'), 0, 0);
+        $schedulerService->attach('* * * * *', $dt10minAgo, ['callback/mock', 'myCallBack'], ['foo']);
+
+        $dt8minAgo = new \DateTime('@'.(($dt10minAgo->getTimestamp()+(2*60))));
+
+        $report = $runnerService->run($dt10minAgo, $dt8minAgo);
+        $this->assertEquals(3, count($report->getSuccesses()));
+        $this->assertEquals(0, count($report->getErrors()));
     }
 
     public function testGetLastLaunchPeriod()
@@ -84,14 +77,7 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
         /** @var JobRunnerService $runnerService */
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-        $callbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
-            ->setMethods(['myCallBack'])
-            ->getMock();
-        $callbackMock->expects($this->once())
-            ->method('myCallBack')
-            ->will($this->returnValue(true));
-
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), [$callbackMock, 'myCallBack']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), ['callback/mock', 'myCallBack']);
 
         $runnerService->run(new \DateTime('@'.$now), new \DateTime('@'.($now+1)));
         $lastLaunchPeriod = $runnerService->getLastLaunchPeriod();
@@ -106,27 +92,60 @@ class JobRunnerServiceTest extends \PHPUnit_Framework_TestCase
      */
     private function getServiceManager()
     {
-        $driver = new \common_persistence_InMemoryKvDriver();
-        $driver->connect('test', []);
-        $config = new \common_persistence_KeyValuePersistence([], $driver);
-        $serviceManager = new ServiceManager($config);
-
-
-        $scheduler = new SchedulerService([]);
         $runner = new JobRunnerService([
             JobRunnerService::OPTION_PERSISTENCE => 'test'
         ]);
+        $scheduler = new SchedulerService([
+            SchedulerService::OPTION_JOBS_STORAGE => SchedulerRdsStorage::class,
+            SchedulerService::OPTION_JOBS_STORAGE_PARAMS => ['test_scheduler'],
+        ]);
 
-        $serviceManager->register(SchedulerService::SERVICE_ID, $scheduler);
-        $serviceManager->register(JobRunnerService::SERVICE_ID, $runner);
-        $serviceManager->register(common_persistence_Manager::SERVICE_ID, new common_persistence_Manager([
+        $persistenceManager = $this->getSqlMock('test_scheduler');
+        $persistence = $persistenceManager->getPersistenceById('test_scheduler');
+        SchedulerRdsStorage::install($persistence);
+
+        $callbackMock = $this->getMockBuilder('\stdClass')
+            ->setMethods(['myCallBack'])
+            ->getMock();
+        $callbackMock->expects($this->any())
+            ->method('myCallBack')
+            ->with($this->equalTo('foo'));
+        $callbackMock->method('myCallBack')->will($this->returnValue(true));
+
+        $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
+            ->setMethods(['myCallBack'])
+            ->getMock();
+        $errorCallbackMock->expects($this->any())
+            ->method('myCallBack')
+            ->with($this->equalTo('foo'), $this->equalTo('bar'))
+            ->will($this->returnCallback(function () {
+                throw new \Exception('foo');
+            }));
+
+        $persistenceManager = new \common_persistence_Manager([
             'persistences' => [
                 'test' => [
                     'driver' => 'no_storage'
                 ],
             ]
-        ]));
+        ]);
 
+        $pmReflection = new \ReflectionClass($persistenceManager);
+        $property = $pmReflection->getProperty('persistences');
+        $property->setAccessible(true);
+        $persistences = $property->getValue($persistenceManager);
+        $persistences['test_scheduler'] = $persistence;
+        $property->setValue($persistenceManager, $persistences);
+
+        $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+        $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
+        $config->set(SchedulerService::SERVICE_ID, $scheduler);
+        $config->set(JobRunnerService::SERVICE_ID, $runner);
+        $config->set('generis/log', new \oat\oatbox\log\LoggerService([]));
+        $config->set('callback/mock', $callbackMock);
+        $config->set('errorcallback/mock', $errorCallbackMock);
+        $serviceManager = new ServiceManager($config);
+        $scheduler->setServiceLocator($serviceManager);
         return $serviceManager;
     }
 

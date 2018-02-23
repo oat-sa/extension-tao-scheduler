@@ -23,6 +23,9 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoScheduler\model\job\Job;
 use DateTimeInterface;
 use oat\oatbox\log\LoggerAwareTrait;
+use Scheduler\Scheduler;
+use Scheduler\Job\Job as SchedulerJob;
+use oat\taoScheduler\model\action\Action;
 
 /**
  * Class SchedulerService
@@ -31,20 +34,25 @@ use oat\oatbox\log\LoggerAwareTrait;
  */
 class SchedulerService extends ConfigurableService implements SchedulerServiceInterface
 {
+    /**
+     * @deprecated
+     */
+    const OPTION_JOBS = 'jobs';
+    const OPTION_JOBS_STORAGE = 'jobs_storage';
+    const OPTION_JOBS_STORAGE_PARAMS = 'jobs_storage_params';
 
     use LoggerAwareTrait;
+
+    /** @var SchedulerStorageInterface */
+    private $storage;
 
     /**
      * @inheritdoc
      */
     public function attach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
-        $jobs = $this->getOption(self::OPTION_JOBS);
         $job = new Job($rRule, $startTime, $callback, $params);
-        $jobs[] = $job;
-        $this->setOption(self::OPTION_JOBS, $jobs);
-
-        return true;
+        return $this->getStorage()->add($job);
     }
 
     /**
@@ -52,31 +60,71 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
      */
     public function detach($rRule, DateTimeInterface $startTime, $callback, $params = [])
     {
-        $jobs = $this->getJobs();
         $jobToRemove = new Job($rRule, $startTime, $callback, $params);
-        $result = false;
-        if (($key = array_search($jobToRemove, $jobs)) !== false) {
-            unset($jobs[$key]);
-        }
-        $this->setOption(self::OPTION_JOBS, $jobs);
-        return $result;
+        return $this->getStorage()->remove($jobToRemove);
     }
 
     /**
      * Return array of all the scheduled jobs
-     * @return Jobs[]
+     * @return Job[]
      */
     public function getJobs()
     {
-        $jobs = $this->getOption(self::OPTION_JOBS);
+        return $this->getStorage()->getJobs();
+    }
+
+    /**
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
+     * @return \oat\taoScheduler\model\action\ActionInterface[]
+     */
+    public function getScheduledActions(DateTimeInterface $from, DateTimeInterface $to)
+    {
         $result = [];
-        foreach ($jobs as $job) {
-            if (is_array($job)) {
-                $result[] = new Job($job[0], new \DateTime('@'.$job[1], new \DateTimeZone('UTC')), $job[2], $job[3]);
-            } else {
-                $result[] = $job;
-            }
+
+        /** @var Job[] $taoJobs */
+        $taoJobs = $this->getJobs();
+        $scheduler = new Scheduler();
+        foreach ($taoJobs as $taoJob) {
+            $action = $this->getAction($taoJob->getCallable(), $taoJob->getParams());
+            $schedulerJob = SchedulerJob::createFromString($taoJob->getRrule(), $taoJob->getStartTime(), $action);
+            $scheduler->addJob($schedulerJob);
         }
+        $scheduledActions = $scheduler->getIterator($from, $to, true);
+
+        foreach ($scheduledActions as $scheduledAction) {
+            /** @var Action $action */
+            $action = clone($scheduledAction->getJob()->getCallable());
+            $action->setStartTime($scheduledAction->getTime());
+            $result[] = $action;
+        }
+
         return $result;
+    }
+
+    /**
+     * @param $callable
+     * @param $params
+     * @return Action
+     */
+    private function getAction($callable, $params)
+    {
+        $action = new Action($callable, $params);
+        $action->setServiceLocator($this->getServiceLocator());
+        return $action;
+    }
+
+    /**
+     * @return SchedulerStorageInterface
+     */
+    private function getStorage()
+    {
+        if ($this->storage === null) {
+            $storageClass = $this->getOption(self::OPTION_JOBS_STORAGE);
+            $storageParams = $this->getOption(self::OPTION_JOBS_STORAGE_PARAMS);
+            $this->storage = new $storageClass(...$storageParams);
+            $this->storage->setServiceLocator($this->getServiceLocator());
+        }
+        return $this->storage;
     }
 }

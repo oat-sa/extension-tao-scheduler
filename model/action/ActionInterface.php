@@ -18,42 +18,34 @@
  *
  */
 
-namespace oat\taoScheduler\model\job;
+namespace oat\taoScheduler\model\action;
 
-use oat\oatbox\PhpSerializable;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 /**
- * Class Job
- * @package oat\taoScheduler
+ * Interface ActionInterface
+ * @package oat\taoScheduler\model\action
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-interface JobInterface extends PhpSerializable, \JsonSerializable
+interface ActionInterface extends ServiceLocatorAwareInterface
 {
-
     /**
-     * @return string
+     * @return mixed
      */
-    public function getRRule();
+    public function __invoke();
 
     /**
      * @return callable
      */
-    public function getCallable();
+    public function getCallback();
 
     /**
-     * @return \DateTimeInterface
-     */
-    public function getStartTime();
-
-    /**
-     * @return array
+     * @return mixed
      */
     public function getParams();
 
     /**
-     * Restore Job from json
-     * @param string $json
-     * @return JobInterface
+     * @return \DateTimeInterface|null
      */
-    public static function restore($json);
+    public function getStartTime();
 }

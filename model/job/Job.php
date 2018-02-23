@@ -55,7 +55,7 @@ class Job implements JobInterface
     /**
      * Schedule an event
      *
-     * @param string $rRule Recurrence rule (@see https://tools.ietf.org/html/rfc5545#section-3.3.10)
+     * @param string $rRule Recurrence rule: iCalendar (@see https://tools.ietf.org/html/rfc5545#section-3.3.10) or Cron syntax
      * @param DateTimeInterface $startTime
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])
@@ -115,6 +115,17 @@ class Job implements JobInterface
     }
 
     /**
+     * @param string $json
+     * @return JobInterface
+     */
+    public static function restore($json)
+    {
+        $arr = json_decode($json, true);
+        eval('$callback='.$arr['callback'].';');
+        return new static($arr['rrule'], new \DateTime('@'.$arr['startTime']), $callback, $arr['params']);
+    }
+
+    /**
      * @param $callback
      * @return null|string
      * @throws SchedulerException
@@ -144,4 +155,20 @@ class Job implements JobInterface
         return $result;
     }
 
+    /**
+     * @return array
+     * @throws SchedulerException
+     * @throws \common_exception_Error
+     */
+    public function jsonSerialize()
+    {
+        $callbackPhpCode = $this->getPhpCode($this->getCallable());
+        $arr = [
+            'rrule' => $this->getRRule(),
+            'startTime' => $this->getStartTime()->getTimestamp(),
+            'callback' => $callbackPhpCode,
+            'params' => $this->getParams(),
+        ];
+        return $arr;
+    }
 }
