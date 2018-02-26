@@ -75,5 +75,7 @@ class Updater extends common_ext_ExtensionUpdater
             $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $scheduler);
             $this->setVersion('0.5.1');
         }
+
+        $this->skip('0.5.1', '0.5.2');
     }
 }
