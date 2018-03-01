@@ -76,18 +76,8 @@ class SchedulerHelper extends AbstractAction
      */
     private function show($from = null, $to = null)
     {
-        $utcTz = new \DateTimeZone('UTC');
-        if ($from === null) {
-            $from = new DateTime('now', $utcTz);
-        } else {
-            $from = new DateTime('@'.$from, $utcTz);
-        }
-
-        if ($to === null) {
-            $to = new DateTime('now', $utcTz);
-        } else {
-            $to = new DateTime('@'.$to, $utcTz);
-        }
+        $from = $this->getDateTime($from);
+        $to = $this->getDateTime($to);
 
         /** @var TaoScheduler $taoSchedulerService */
         $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
@@ -111,4 +101,21 @@ class SchedulerHelper extends AbstractAction
         return $report;
     }
 
+    /**
+     * Get DateTime instance from timestamp.
+     * If null given then current time will be used.
+     * Timezonde is allways UTC
+     * @param $time
+     * @return DateTime
+     */
+    private function getDateTime($time)
+    {
+        $utcTz = new \DateTimeZone('UTC');
+        if ($time === null) {
+            $time = new DateTime('now', $utcTz);
+        } else {
+            $time = new DateTime('@'.$time, $utcTz);
+        }
+        return $time;
+    }
 }

@@ -21,7 +21,7 @@
 namespace oat\taoScheduler\model\scheduler;
 
 use DateTimeInterface;
-use \oat\taoScheduler\model\job\Job;
+use oat\taoScheduler\model\job\Job;
 use oat\taoScheduler\model\action\ActionInterface;
 
 /**
@@ -69,4 +69,21 @@ interface SchedulerServiceInterface
      * @return ActionInterface[]
      */
     public function getScheduledActions(DateTimeInterface $from, DateTimeInterface $to);
+
+    /**
+     * Get time of recurrences between dates. $from and $to dates included.
+     * @param Job $job
+     * @param DateTimeInterface $from
+     * @param DateTimeInterface $to
+     * @return DateTimeInterface[]
+     */
+    public function getRecurrences(Job $job, DateTimeInterface $from, DateTimeInterface $to);
+
+    /**
+     * Get the next recurrence after date. $after time included.
+     * @param Job $job
+     * @param DateTimeInterface $after
+     * @return DateTimeInterface|null
+     */
+    public function getNextRecurrence(Job $job, DateTimeInterface $after);
 }
