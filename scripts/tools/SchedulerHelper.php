@@ -73,7 +73,7 @@ class SchedulerHelper extends AbstractAction
      * Show scheduled tasks
      *
      * Run example:
-     * ```php
+     * ```
      * sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1519890883 1519899883
      * ```
      *
@@ -116,7 +116,7 @@ class SchedulerHelper extends AbstractAction
      * so all jobs which will not be executed by JobRunner will be removed from scheduler storage.
      *
      * Run example:
-     * ```php
+     * ```
      * //remove jobs from  scheduler storage which will not be executed anymore after 1519890884:
      * sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' removeExpiredJobs false 1519890884
      * ```
