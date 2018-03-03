@@ -25,6 +25,8 @@ use DateTime;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface as TaoScheduler;
 use common_report_Report as Report;
+use oat\taoScheduler\model\runner\JobRunnerService;
+use oat\taoScheduler\model\SchedulerException;
 
 /**
  * Class JobRunner
@@ -37,7 +39,7 @@ class SchedulerHelper extends AbstractAction
 {
     use LoggerAwareTrait;
 
-    static $validMethods = ['show'];
+    private static $validMethods = ['show', 'removeExpiredJobs'];
 
     /** @var array */
     private $params;
@@ -69,6 +71,12 @@ class SchedulerHelper extends AbstractAction
 
     /**
      * Show scheduled tasks
+     *
+     * Run example:
+     * ```php
+     * sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1519890883 1519899883
+     * ```
+     *
      * @param $from
      * @param $to
      * @return Report
@@ -98,6 +106,69 @@ class SchedulerHelper extends AbstractAction
         }
 
         $report->add(new Report(Report::TYPE_INFO, $count . ' tasks scheduled'));
+        return $report;
+    }
+
+    /**
+     * Remove expired jobs from storage.
+     *
+     * if `$expiredAfterTime` parameter is not given then the last lauch time of job runner will be used,
+     * so all jobs which will not be executed by JobRunner will be removed from scheduler storage.
+     *
+     * Run example:
+     * ```php
+     * //remove jobs from  scheduler storage which will not be executed anymore after 1519890884:
+     * sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' removeExpiredJobs false 1519890884
+     * ```
+     *
+     * @param $dryRun
+     * @param integer $expiredAfterTime timestamp
+     * @return Report
+     * @throws \common_exception_Error
+     */
+    private function removeExpiredJobs($dryRun, $expiredAfterTime = null)
+    {
+        $dryRun = filter_var($dryRun, FILTER_VALIDATE_BOOLEAN);
+        $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
+
+        if ($expiredAfterTime === null) {
+            /** @var JobRunnerService $jobRunner */
+            $jobRunner = $this->getServiceLocator()->get(JobRunnerService::SERVICE_ID);
+            /** @var TaoScheduler $taoSchedulerService */
+            $lastLaunch = $jobRunner->getLastLaunchPeriod();
+            if ($lastLaunch === null) {
+                return Report::createFailure('Job runner does not have last launch period. Impossible to determine expired tasks.');
+            }
+            $expiredAfterTime = new DateTime('@'.($lastLaunch->getFrom()->getTimestamp()-1));
+        } else {
+            $expiredAfterTime = new DateTime('@'.$expiredAfterTime);
+        }
+        $report = new Report(Report::TYPE_INFO, 'Search for tasks expired after ' . $expiredAfterTime->format(DateTime::ISO8601));
+        $jobs = $taoSchedulerService->getJobs();
+        foreach ($jobs as $job) {
+            if ($taoSchedulerService->getNextRecurrence($job, $expiredAfterTime) !== null) {
+                continue;
+            }
+            $removeReport = new Report(Report::TYPE_WARNING, 'Job to be removed:');
+            $removeReport->add(
+                new Report(
+                    Report::TYPE_INFO,
+                    '- RRule: ' . $job->getRRule() . PHP_EOL .
+                    '    - StartTime: ' . $job->getStartTime()->format(DateTime::ISO8601) . PHP_EOL .
+                    '    - Callable: ' . \common_Utils::toPHPVariableString($job->getCallable()) . PHP_EOL .
+                    '    - Params: ' . \common_Utils::toPHPVariableString($job->getParams())
+                )
+            );
+            if (!$dryRun) {
+                try {
+                    $taoSchedulerService->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
+                    $removeReport->add(Report::createSuccess('Job successfully removed'));
+                } catch (SchedulerException $e) {
+                    $removeReport->add(Report::createFailure('Cannot remove job'));
+                }
+            }
+            $report->add($removeReport);
+        }
         return $report;
     }
 
