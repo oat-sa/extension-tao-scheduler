@@ -112,7 +112,7 @@ class SchedulerHelper extends AbstractAction
     /**
      * Remove expired jobs from storage.
      *
-     * if `$expiredAfterTime` parameter is not given then the last lauch time of job runner will be used,
+     * if `$expiredAfterTime` parameter is not given then the last launch time of job runner will be used,
      * so all jobs which will not be executed by JobRunner will be removed from scheduler storage.
      *
      * Run example:
@@ -145,10 +145,12 @@ class SchedulerHelper extends AbstractAction
         }
         $report = new Report(Report::TYPE_INFO, 'Search for tasks expired after ' . $expiredAfterTime->format(DateTime::ISO8601));
         $jobs = $taoSchedulerService->getJobs();
+        $found = false;
         foreach ($jobs as $job) {
             if ($taoSchedulerService->getNextRecurrence($job, $expiredAfterTime) !== null) {
                 continue;
             }
+            $found = true;
             $removeReport = new Report(Report::TYPE_WARNING, 'Job to be removed:');
             $removeReport->add(
                 new Report(
@@ -168,6 +170,9 @@ class SchedulerHelper extends AbstractAction
                 }
             }
             $report->add($removeReport);
+        }
+        if (!$found) {
+            $report->add(Report::createInfo('No expired jobs found.'));
         }
         return $report;
     }
