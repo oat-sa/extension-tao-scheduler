@@ -65,11 +65,20 @@ If there is no last iteration time in the storage current timestamp will be used
 
 - Second parameter is time between Job Runner iterations. Default value is 60 seconds. This time may be longer than configured because execution of tasks found during current iteration may take some time. 
 
-###Discover tasks to me run
+###Discover tasks to be run
 
 ```
 sudo -u www-data php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' show 1518097355 1518100955 
 ```
+
+###Remove expired jobs from job storage (jobs which will not be executed anymore after given date):
+
+```
+sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' removeExpiredJobs false 1519890884 
+```
+
+- First parameter is dryrun mode. `false` by default. 
+- Second parameter is time since which helper will try to find expired jobs (including given time). If parameter was not given then the last launch time of job runner will be used.
 
 ###Warnings
 
