@@ -103,6 +103,26 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getRecurrences(Job $job, DateTimeInterface $from, DateTimeInterface $to)
+    {
+        $action = $this->getAction($job->getCallable(), $job->getParams());
+        $schedulerJob = SchedulerJob::createFromString($job->getRrule(), $job->getStartTime(), $action);
+        return $schedulerJob->getRRule()->getRecurrences($from, $to);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getNextRecurrence(Job $job, DateTimeInterface $after)
+    {
+        $action = $this->getAction($job->getCallable(), $job->getParams());
+        $schedulerJob = SchedulerJob::createFromString($job->getRrule(), $job->getStartTime(), $action);
+        return $schedulerJob->getRRule()->getNextRecurrence($after);
+    }
+
+    /**
      * @param $callable
      * @param $params
      * @return Action
