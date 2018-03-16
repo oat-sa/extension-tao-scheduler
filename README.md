@@ -33,6 +33,7 @@ $schedulerService->attach(
 
 _Note_: 
 > You can use any instance of callable type as callback except functions. In case if object is used ([$object, 'method']) make sure that object is instance of `PhpSerializable`.  
+> Class name of `oat\oatbox\action\Action` instance may be used as a callback
 
 ###detach a job:
 
@@ -79,6 +80,20 @@ sudo php index.php '\oat\taoScheduler\scripts\tools\SchedulerHelper' removeExpir
 
 - First parameter is dryrun mode. `false` by default. 
 - Second parameter is time since which helper will try to find expired jobs (including given time). If parameter was not given then the last launch time of job runner will be used.
+
+####To run tasks through the task queue you may use `\oat\taoTaskQueue\scripts\tools\AddTaskToQueue` action.
+_Note_: 
+> taoScheduler does not require taoTaskQueue extension. Make sure that task queue is installed.
+ 
+```php
+use oat\taoTaskQueue\scripts\tools\AddTaskToQueue;
+$schedulerService->attach(
+    '*/5 * * * *',
+    new DateTime('now', new \DateTimeZone('utc')),
+    AddTaskToQueue::class,
+    [ActionClassToBeRun::class, 'param 1', 'param2']
+);
+```
 
 ###Warnings
 
