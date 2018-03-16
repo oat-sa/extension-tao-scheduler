@@ -56,8 +56,10 @@ class Action implements ActionInterface
         $callback = $this->callback;
 
         if (is_string($callback) && is_subclass_of($callback, TaoAction::class)) {
+            /** @var TaoAction $callback */
             $callback = new $callback();
-            $this->params = $this->params === null ? [null] : $this->params;
+            $callback->setServiceLocator($this->getServiceLocator());
+            $this->params = $this->params === null ? [null] : [$this->params];
         }
 
         if (is_array($callback) && count($callback) == 2) {
