@@ -25,6 +25,7 @@ use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\action\ActionInterface;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\oatbox\action\Action as TaoAction;
 
 /**
  * Class SchedulerService
@@ -97,10 +98,11 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
 
         $scheduler->attach('FREQ=MINUTELY;COUNT=5', $dt, ['\DateTime', 'createFromFormat'], ['j-M-Y', '22-Feb-2018']);
         $scheduler->attach('* * * * *', $dt, ['\DateTime', 'createFromFormat'], ['j-M-Y', '22-Feb-2018']);
+        $scheduler->attach('* * * * *', $dt, ActionMock::class);
 
         $actions = $scheduler->getScheduledActions($dt, new DateTime('@' . ($dt->getTimestamp() + (2 * 60))));
 
-        $this->assertEquals(6, count($actions));
+        $this->assertEquals(9, count($actions));
 
         foreach ($actions as $action) {
             $this->assertTrue($action instanceof ActionInterface);
@@ -198,5 +200,14 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
         return $scheduler;
+    }
+}
+
+
+class ActionMock implements TaoAction
+{
+    public function __invoke($params)
+    {
+        return true;
     }
 }
