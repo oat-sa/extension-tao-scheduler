@@ -21,6 +21,7 @@
 namespace oat\taoScheduler\model\action;
 
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use oat\oatbox\action\Action as TaoAction;
 
 /**
  * Class Action
@@ -53,6 +54,14 @@ class Action implements ActionInterface
     public function __invoke()
     {
         $callback = $this->callback;
+
+        if (is_string($callback) && is_subclass_of($callback, TaoAction::class)) {
+            /** @var TaoAction $callback */
+            $callback = new $callback();
+            $callback->setServiceLocator($this->getServiceLocator());
+            $this->params = $this->params === null ? [null] : [$this->params];
+        }
+
         if (is_array($callback) && count($callback) == 2) {
             list($key, $function) = $callback;
             if (is_string($key) && !class_exists($key) && $this->getServiceLocator()->has($key)) {

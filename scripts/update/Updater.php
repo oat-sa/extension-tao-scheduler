@@ -22,7 +22,6 @@
 namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
-use oat\taoScheduler\model\job\Job;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
@@ -76,6 +75,6 @@ class Updater extends common_ext_ExtensionUpdater
             $this->setVersion('0.5.1');
         }
 
-        $this->skip('0.5.1', '0.7.0');
+        $this->skip('0.5.1', '0.8.0');
     }
 }
