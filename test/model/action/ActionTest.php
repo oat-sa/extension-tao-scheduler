@@ -21,6 +21,8 @@
 namespace oat\taoScheduler\test\model\action;
 
 use oat\taoScheduler\model\action\Action;
+use oat\oatbox\extension\AbstractAction;
+use oat\oatbox\service\ServiceManager;
 use oat\oatbox\action\Action as TaoAction;
 
 /**
@@ -35,6 +37,10 @@ class ActionTest extends \PHPUnit_Framework_TestCase
     {
         $action = new Action(ActionMock::class);
         $this->assertTrue($action());
+
+        $action = new Action(ActionMockSWAware::class);
+        $action->setServiceLocator(new ServiceManager([]));
+        $this->assertTrue($action());
     }
 }
 
@@ -43,5 +49,13 @@ class ActionMock implements TaoAction
     public function __invoke($params)
     {
         return true;
+    }
+}
+
+class ActionMockSWAware extends AbstractAction
+{
+    public function __invoke($params)
+    {
+        return $this->getServiceLocator() !== null;
     }
 }
