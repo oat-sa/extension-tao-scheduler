@@ -55,6 +55,7 @@ class Action implements ActionInterface
     public function __invoke()
     {
         $callback = $this->callback;
+        $params = $this->params;
 
         if (is_string($callback) && is_subclass_of($callback, TaoAction::class)) {
             /** @var TaoAction $callback */
@@ -62,7 +63,7 @@ class Action implements ActionInterface
             if ($callback instanceof ServiceLocatorAwareInterface) {
                 $callback->setServiceLocator($this->getServiceLocator());
             }
-            $this->params = $this->params === null ? [null] : [$this->params];
+            $params = $this->params === null ? [null] : [$this->params];
         }
 
         if (is_array($callback) && count($callback) == 2) {
@@ -72,7 +73,7 @@ class Action implements ActionInterface
                 $callback = [$service, $function];
             }
         }
-        return call_user_func_array($callback, $this->params);
+        return call_user_func_array($callback, $params);
     }
 
     /**
