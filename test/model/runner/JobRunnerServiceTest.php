@@ -20,6 +20,7 @@
 
 namespace oat\taoScheduler\test\model\job;
 
+use oat\taoScheduler\model\inspector\RdsActionInspector;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\runner\JobRunnerPeriod;
@@ -66,6 +67,11 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $report = $runnerService->run($dt10minAgo, $dt8minAgo);
         $this->assertEquals(3, count($report->getSuccesses()));
         $this->assertEquals(0, count($report->getErrors()));
+
+        //try to run already performed actions
+        $report = $runnerService->run(new \DateTime('@'.($now)), new \DateTime('@'.($now+3)));
+        $this->assertEquals(0, count($report->getErrors()));
+        $this->assertEquals(0, count($report->getSuccesses()));
     }
 
     public function testGetLastLaunchPeriod()
@@ -93,7 +99,8 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
     private function getServiceManager()
     {
         $runner = new JobRunnerService([
-            JobRunnerService::OPTION_PERSISTENCE => 'test'
+            JobRunnerService::OPTION_PERSISTENCE => 'test',
+            JobRunnerService::OPTION_RDS_PERSISTENCE => 'test_scheduler'
         ]);
         $scheduler = new SchedulerService([
             SchedulerService::OPTION_JOBS_STORAGE => SchedulerRdsStorage::class,
@@ -103,6 +110,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $persistenceManager = $this->getSqlMock('test_scheduler');
         $persistence = $persistenceManager->getPersistenceById('test_scheduler');
         SchedulerRdsStorage::install($persistence);
+        RdsActionInspector::initDatabase($persistence);
 
         $callbackMock = $this->getMockBuilder('\stdClass')
             ->setMethods(['myCallBack'])
