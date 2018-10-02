@@ -29,6 +29,12 @@ use DateTime;
 use common_report_Report as Report;
 use oat\taoScheduler\model\inspector\RdsActionInspector;
 use oat\taoScheduler\model\action\Action;
+use Scheduler\Job\Job;
+use Scheduler\JobRunner\JobRunner;
+use Scheduler\Scheduler;
+use DateTimeZone;
+use InvalidArgumentException;
+use common_persistence_Manager as PersistenceManager;
 
 /**
  * Class JobRunner
@@ -69,16 +75,16 @@ class JobRunnerService extends ConfigurableService
         $jobs = [];
         foreach ($taoSchedulerService->getJobs() as $taoJob) {
             $action = $this->propagate(new Action($taoJob->getCallable(), $taoJob->getParams()));
-            $jobs[] = \Scheduler\Job\Job::createFromString(
+            $jobs[] = Job::createFromString(
                 $taoJob->getRRule(),
                 $taoJob->getStartTime(),
                 $action,
-                new \DateTimeZone('UTC')
+                new DateTimeZone('UTC')
             );
         };
 
-        $jobRunner = new \Scheduler\JobRunner\JobRunner($this->getActionInspector());
-        $scheduler = new \Scheduler\Scheduler($jobs);
+        $jobRunner = new JobRunner($this->getActionInspector());
+        $scheduler = new Scheduler($jobs);
         $schedulerReports = $jobRunner->run($scheduler, $from, $to);
         foreach ($schedulerReports as $report) {
             $taoReport = $report->getType() === 'success' ?
@@ -132,10 +138,10 @@ class JobRunnerService extends ConfigurableService
     private function getPersistence()
     {
         if (!$this->hasOption(self::OPTION_PERSISTENCE)) {
-            throw new \InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
+            throw new InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
         }
         $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
-        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
+        return $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 
     /**
@@ -144,9 +150,9 @@ class JobRunnerService extends ConfigurableService
     private function getRdsPersistence()
     {
         if (!$this->hasOption(self::OPTION_RDS_PERSISTENCE)) {
-            throw new \InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
+            throw new InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
         }
         $persistenceId = $this->getOption(self::OPTION_RDS_PERSISTENCE);
-        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
+        return $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 }
