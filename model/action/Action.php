@@ -23,6 +23,7 @@ namespace oat\taoScheduler\model\action;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use oat\oatbox\action\Action as TaoAction;
+use common_report_Report as Report;
 
 /**
  * Class Action
@@ -55,6 +56,7 @@ class Action implements ActionInterface
     public function __invoke()
     {
         $callback = $this->callback;
+        $params = $this->params;
 
         if (is_string($callback) && is_subclass_of($callback, TaoAction::class)) {
             /** @var TaoAction $callback */
@@ -62,7 +64,7 @@ class Action implements ActionInterface
             if ($callback instanceof ServiceLocatorAwareInterface) {
                 $callback->setServiceLocator($this->getServiceLocator());
             }
-            $this->params = $this->params === null ? [null] : [$this->params];
+            $params = $this->params === null ? [null] : [$this->params];
         }
 
         if (is_array($callback) && count($callback) == 2) {
@@ -72,7 +74,12 @@ class Action implements ActionInterface
                 $callback = [$service, $function];
             }
         }
-        return call_user_func_array($callback, $this->params);
+
+        $result = call_user_func_array($callback, $params);
+        if ($result instanceof Report) {
+            $result = json_encode($result);
+        }
+        return $result;
     }
 
     /**
