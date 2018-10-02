@@ -100,7 +100,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
     {
         $runner = new JobRunnerService([
             JobRunnerService::OPTION_PERSISTENCE => 'test',
-            JobRunnerService::OPTION_RDS_PERSISTENCE => 'test_scheduler'
+            JobRunnerService::OPTION_ACTION_INSPECTOR_PERSISTENCE => 'test_scheduler'
         ]);
         $scheduler = new SchedulerService([
             SchedulerService::OPTION_JOBS_STORAGE => SchedulerRdsStorage::class,

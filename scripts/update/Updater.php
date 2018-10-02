@@ -82,7 +82,7 @@ class Updater extends common_ext_ExtensionUpdater
             $persistenceManager = $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID);
             $persistence = $persistenceManager->getPersistenceById('default');
             $jobRunnerService = $this->getServiceManager()->get(JobRunnerService::SERVICE_ID);
-            $jobRunnerService->setOption(JobRunnerService::OPTION_RDS_PERSISTENCE, 'default');
+            $jobRunnerService->setOption(JobRunnerService::OPTION_ACTION_INSPECTOR_PERSISTENCE, 'default');
             $this->getServiceManager()->register(JobRunnerService::SERVICE_ID, $jobRunnerService);
             RdsActionInspector::initDatabase($persistence);
             $this->setVersion('0.9.0');

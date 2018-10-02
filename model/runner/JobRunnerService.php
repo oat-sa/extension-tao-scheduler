@@ -46,9 +46,11 @@ class JobRunnerService extends ConfigurableService
     use LoggerAwareTrait;
 
     const SERVICE_ID = 'taoScheduler/JobRunnerService';
+    /** @var string - identifier of key-value persistence to store last launch time  */
     const OPTION_PERSISTENCE = 'persistence';
     const PERIOD_KEY = 'taoScheduler:lastLaunchPeriod';
-    const OPTION_RDS_PERSISTENCE = 'rds_persistence';
+    /** @var string - identifier of rds persistence to store performed actions */
+    const OPTION_ACTION_INSPECTOR_PERSISTENCE = 'action_inspector_persistence';
 
     /** @var Report */
     private $report;
@@ -102,7 +104,7 @@ class JobRunnerService extends ConfigurableService
     public function getActionInspector()
     {
         if ($this->actionInspector === null) {
-            $this->actionInspector = $this->propagate(new RdsActionInspector($this->getRdsPersistence()));
+            $this->actionInspector = $this->propagate(new RdsActionInspector($this->getActionInspectorPersistence()));
         }
         return $this->actionInspector;
     }
@@ -147,12 +149,12 @@ class JobRunnerService extends ConfigurableService
     /**
      * @return \common_persistence_SqlPersistence
      */
-    private function getRdsPersistence()
+    private function getActionInspectorPersistence()
     {
-        if (!$this->hasOption(self::OPTION_RDS_PERSISTENCE)) {
+        if (!$this->hasOption(self::OPTION_ACTION_INSPECTOR_PERSISTENCE)) {
             throw new InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
         }
-        $persistenceId = $this->getOption(self::OPTION_RDS_PERSISTENCE);
+        $persistenceId = $this->getOption(self::OPTION_ACTION_INSPECTOR_PERSISTENCE);
         return $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 }
