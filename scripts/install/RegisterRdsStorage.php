@@ -24,6 +24,7 @@ namespace oat\taoScheduler\scripts\install;
 use oat\oatbox\extension\AbstractAction;
 use common_report_Report;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoScheduler\model\inspector\RdsActionInspector;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 
@@ -54,6 +55,7 @@ class RegisterRdsStorage extends AbstractAction
         $schedulerStorageOptions = $schedulerService->getOption(SchedulerService::OPTION_JOBS_STORAGE_PARAMS);
         $persistence = $persistenceManager->getPersistenceById($schedulerStorageOptions[0]);
         call_user_func_array([$schedulerStorageClass, 'install'], [$persistence]);
+        RdsActionInspector::initDatabase($persistence);
         $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $schedulerService);
         return new common_report_Report(common_report_Report::TYPE_SUCCESS, __('Scheduler job storage successfully created'));
     }

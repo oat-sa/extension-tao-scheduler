@@ -27,6 +27,14 @@ use common_report_Report;
 use DateTimeInterface;
 use DateTime;
 use common_report_Report as Report;
+use oat\taoScheduler\model\inspector\RdsActionInspector;
+use oat\taoScheduler\model\action\Action;
+use Scheduler\Job\Job;
+use Scheduler\JobRunner\JobRunner;
+use Scheduler\Scheduler;
+use DateTimeZone;
+use InvalidArgumentException;
+use common_persistence_Manager as PersistenceManager;
 
 /**
  * Class JobRunner
@@ -38,11 +46,17 @@ class JobRunnerService extends ConfigurableService
     use LoggerAwareTrait;
 
     const SERVICE_ID = 'taoScheduler/JobRunnerService';
+    /** @var string - identifier of key-value persistence to store last launch time  */
     const OPTION_PERSISTENCE = 'persistence';
     const PERIOD_KEY = 'taoScheduler:lastLaunchPeriod';
+    /** @var string - identifier of rds persistence to store performed actions */
+    const OPTION_ACTION_INSPECTOR_PERSISTENCE = 'action_inspector_persistence';
 
     /** @var Report */
     private $report;
+
+    /** @var RdsActionInspector */
+    private $actionInspector;
 
     /**
      * @param DateTimeInterface $from
@@ -60,25 +74,39 @@ class JobRunnerService extends ConfigurableService
 
         /** @var TaoScheduler $taoSchedulerService */
         $taoSchedulerService = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID);
-        $actions = $taoSchedulerService->getScheduledActions($from, $to);
-        $reports = [];
+        $jobs = [];
+        foreach ($taoSchedulerService->getJobs() as $taoJob) {
+            $action = $this->propagate(new Action($taoJob->getCallable(), $taoJob->getParams()));
+            $jobs[] = Job::createFromString(
+                $taoJob->getRRule(),
+                $taoJob->getStartTime(),
+                $action,
+                new DateTimeZone('UTC')
+            );
+        };
 
-        foreach ($actions as $action) {
-            try {
-                $actionResult = $action();
-                if (!$actionResult instanceof Report) {
-                    $actionResult = is_string($actionResult) ? $actionResult : Report::createSuccess(json_encode($actionResult));
-                }
-                $reports[] = $actionResult;
-            } catch (\Exception $e) {
-                $reports[] = Report::createFailure($e->getMessage());
-                $this->logError('Executions of scheduled task failed: ' . $e->getMessage());
-            }
+        $jobRunner = new JobRunner($this->getActionInspector());
+        $scheduler = new Scheduler($jobs);
+        $schedulerReports = $jobRunner->run($scheduler, $from, $to);
+        foreach ($schedulerReports as $report) {
+            $taoReport = $report->getType() === 'success' ?
+                Report::createSuccess(json_encode($report->getResult())) :
+                Report::createFailure(json_encode($report->getResult()));
+            $this->report->add($taoReport);
         }
 
-        $this->processResults($reports);
-
         return $this->report;
+    }
+
+    /**
+     * @return RdsActionInspector
+     */
+    public function getActionInspector()
+    {
+        if ($this->actionInspector === null) {
+            $this->actionInspector = $this->propagate(new RdsActionInspector($this->getActionInspectorPersistence()));
+        }
+        return $this->actionInspector;
     }
 
     /**
@@ -92,18 +120,6 @@ class JobRunnerService extends ConfigurableService
             $result = unserialize($serializedPeriod);
         }
         return $result;
-    }
-
-    /**
-     * @param Report[] $reports
-     * @throws
-     */
-    private function processResults(array $reports = [])
-    {
-        foreach ($reports as $report) {
-            $this->report->add($report);
-            $this->logInfo($report->getMessage());
-        }
     }
 
     /**
@@ -124,10 +140,21 @@ class JobRunnerService extends ConfigurableService
     private function getPersistence()
     {
         if (!$this->hasOption(self::OPTION_PERSISTENCE)) {
-            throw new \InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
+            throw new InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
         }
         $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
-        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
+        return $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 
+    /**
+     * @return \common_persistence_SqlPersistence
+     */
+    private function getActionInspectorPersistence()
+    {
+        if (!$this->hasOption(self::OPTION_ACTION_INSPECTOR_PERSISTENCE)) {
+            throw new InvalidArgumentException('Persistence for ' . self::SERVICE_ID . ' is not configured');
+        }
+        $persistenceId = $this->getOption(self::OPTION_ACTION_INSPECTOR_PERSISTENCE);
+        return $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)->getPersistenceById($persistenceId);
+    }
 }
