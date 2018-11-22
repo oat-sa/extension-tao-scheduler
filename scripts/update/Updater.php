@@ -87,5 +87,7 @@ class Updater extends common_ext_ExtensionUpdater
             RdsActionInspector::initDatabase($persistence);
             $this->setVersion('0.9.0');
         }
+
+        $this->skip('0.9.0', '1.0.0');
     }
 }
