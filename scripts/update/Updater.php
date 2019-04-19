@@ -26,6 +26,9 @@ use oat\taoScheduler\model\inspector\RdsActionInspector;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
+use oat\taoScheduler\scripts\tools\SchedulerHelper;
+use DateTime;
+use DateTimeZone;
 
 /**
  * Class Updater
@@ -89,5 +92,16 @@ class Updater extends common_ext_ExtensionUpdater
         }
 
         $this->skip('0.9.0', '1.0.1');
+
+        if ($this->isVersion('1.0.1')) {
+            /** @var SchedulerService $scheduler */
+            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
+            $scheduler->attach(
+                '0 0 * * *',
+                new DateTime('now', new DateTimeZone('utc')),
+                SchedulerHelper::class, ['removeExpiredJobs', false]
+            );
+            $this->setVersion('1.1.0');
+        }
     }
 }
