@@ -112,7 +112,7 @@ class JobRunner extends AbstractAction
     private function init($params = [])
     {
         $now = time();
-        if (isset($params[0]) and intval($params[0] > 0)) {
+        if (isset($params[0]) && ((int) $params[0]) > 0) {
             $this->from = new DateTime('@'.$params[0], new \DateTimeZone('UTC'));
         } else {
             /** @var JobRunnerService $taoJobRunnerService */
