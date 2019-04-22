@@ -27,6 +27,7 @@ use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 use oat\taoScheduler\scripts\tools\SchedulerHelper;
+use oat\taoScheduler\scripts\update\dbMigrations\Version20190422114045;
 use DateTime;
 use DateTimeZone;
 
@@ -101,6 +102,10 @@ class Updater extends common_ext_ExtensionUpdater
                 new DateTime('now', new DateTimeZone('utc')),
                 SchedulerHelper::class, ['removeExpiredJobs', false]
             );
+            $migration = new Version20190422114045();
+            $migration->setServiceLocator($this->getServiceManager());
+            $migration([]);
+
             $this->setVersion('1.1.0');
         }
     }
