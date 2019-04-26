@@ -83,7 +83,7 @@ class JobRunnerService extends ConfigurableService
                 $action,
                 new DateTimeZone('UTC')
             );
-        };
+        }
 
         $jobRunner = new JobRunner($this->getActionInspector());
         $scheduler = new Scheduler($jobs);
