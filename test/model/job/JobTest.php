@@ -22,13 +22,14 @@ namespace oat\taoScheduler\test\model\job;
 
 use \DateTime;
 use oat\taoScheduler\model\job\Job;
+use oat\generis\test\TestCase;
 
 /**
  * Class JobTest
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class JobTest extends \PHPUnit_Framework_TestCase
+class JobTest extends TestCase
 {
 
     public function testGetRRule()
