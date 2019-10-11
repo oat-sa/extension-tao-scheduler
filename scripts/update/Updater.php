@@ -106,7 +106,8 @@ class Updater extends common_ext_ExtensionUpdater
             $migration->setServiceLocator($this->getServiceManager());
             $migration([]);
 
-            $this->setVersion('2.0.0');
+            $this->setVersion('1.1.0');
         }
+        $this->skip('1.1.0', '2.0.1');
     }
 }
