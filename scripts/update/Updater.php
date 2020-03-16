@@ -22,9 +22,14 @@
 namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
+use oat\taoScheduler\model\inspector\RdsActionInspector;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
+use oat\taoScheduler\scripts\tools\SchedulerHelper;
+use oat\taoScheduler\scripts\update\dbMigrations\Version20190422114045;
+use DateTime;
+use DateTimeZone;
 
 /**
  * Class Updater
@@ -75,6 +80,34 @@ class Updater extends common_ext_ExtensionUpdater
             $this->setVersion('0.5.1');
         }
 
-        $this->skip('0.5.1', '0.9.0');
+        $this->skip('0.5.1', '0.8.2');
+
+        if ($this->isVersion('0.8.2')) {
+            $persistenceManager = $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID);
+            $persistence = $persistenceManager->getPersistenceById('default');
+            $jobRunnerService = $this->getServiceManager()->get(JobRunnerService::SERVICE_ID);
+            $jobRunnerService->setOption(JobRunnerService::OPTION_ACTION_INSPECTOR_PERSISTENCE, 'default');
+            $this->getServiceManager()->register(JobRunnerService::SERVICE_ID, $jobRunnerService);
+            RdsActionInspector::initDatabase($persistence);
+            $this->setVersion('0.9.0');
+        }
+
+        $this->skip('0.9.0', '1.0.1');
+
+        if ($this->isVersion('1.0.1')) {
+            /** @var SchedulerService $scheduler */
+            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
+            $scheduler->attach(
+                '0 0 * * *',
+                new DateTime('now', new DateTimeZone('utc')),
+                SchedulerHelper::class, ['removeExpiredJobs', false]
+            );
+            $migration = new Version20190422114045();
+            $migration->setServiceLocator($this->getServiceManager());
+            $migration([]);
+
+            $this->setVersion('1.1.0');
+        }
+        $this->skip('1.1.0', '2.1.0');
     }
 }

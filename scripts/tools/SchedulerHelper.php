@@ -29,7 +29,7 @@ use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\SchedulerException;
 
 /**
- * Class JobRunner
+ * Class SchedulerHelper
  *
  *
  * @package oat\taoScheduler\model

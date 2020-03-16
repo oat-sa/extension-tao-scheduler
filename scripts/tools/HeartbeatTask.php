@@ -18,46 +18,27 @@
  *
  */
 
-namespace oat\taoScheduler\test\model\action;
+namespace oat\taoScheduler\scripts\tools;
 
-use oat\generis\test\TestCase;
-use oat\taoScheduler\model\action\Action;
 use oat\oatbox\extension\AbstractAction;
-use oat\oatbox\service\ServiceManager;
-use oat\oatbox\action\Action as TaoAction;
-use oat\generis\test\TestCase;
+use oat\oatbox\log\LoggerAwareTrait;
+use common_report_Report as Report;
 
 /**
- * Class ActionTest
+ * Class HeartbeatTask
+ *
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class ActionTest extends TestCase
+class HeartbeatTask extends AbstractAction
 {
+    use LoggerAwareTrait;
 
-    public function testInvoke()
+    /**
+     * @inheritdoc
+     */
+    public function __invoke($params = [])
     {
-        $action = new Action(ActionMock::class);
-        $this->assertTrue($action());
-
-        $action = new Action(ActionMockSWAware::class);
-        $action->setServiceLocator(new ServiceManager([]));
-        $this->assertTrue($action());
-    }
-}
-
-class ActionMock implements TaoAction
-{
-    public function __invoke($params)
-    {
-        return true;
-    }
-}
-
-class ActionMockSWAware extends AbstractAction
-{
-    public function __invoke($params)
-    {
-        return $this->getServiceLocator() !== null;
+        return Report::createSuccess('Heartbeat task successfully executed');
     }
 }
