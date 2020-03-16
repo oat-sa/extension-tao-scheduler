@@ -45,7 +45,6 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
                     delTree($dir . DIRECTORY_SEPARATOR . $file) :
                     unlink($dir . DIRECTORY_SEPARATOR . $file);
             }
-            return rmdir($dir);
         }
     }
 
