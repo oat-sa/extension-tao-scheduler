@@ -35,7 +35,7 @@ use oat\oatbox\action\Action as TaoAction;
 class SchedulerServiceTest extends TaoPhpUnitTestRunner
 {
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $dir = __DIR__ . DIRECTORY_SEPARATOR . 'cache';
         if (file_exists($dir)) {

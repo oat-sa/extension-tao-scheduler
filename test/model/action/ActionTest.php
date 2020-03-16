@@ -20,6 +20,7 @@
 
 namespace oat\taoScheduler\test\model\action;
 
+use oat\generis\test\TestCase;
 use oat\taoScheduler\model\action\Action;
 use oat\oatbox\extension\AbstractAction;
 use oat\oatbox\service\ServiceManager;
@@ -30,7 +31,7 @@ use oat\oatbox\action\Action as TaoAction;
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class ActionTest extends \PHPUnit_Framework_TestCase
+class ActionTest extends TestCase
 {
 
     public function testInvoke()

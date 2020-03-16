@@ -21,14 +21,16 @@
 namespace oat\taoScheduler\test\model\job;
 
 use \DateTime;
+use oat\generis\test\TestCase;
 use oat\taoScheduler\model\job\Job;
+use oat\taoScheduler\model\SchedulerException;
 
 /**
  * Class JobTest
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class JobTest extends \PHPUnit_Framework_TestCase
+class JobTest extends TestCase
 {
 
     public function testGetRRule()
@@ -96,11 +98,9 @@ class JobTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['FREQ=MONTHLY;COUNT=5', $time, ['foo', 'bar'], []], $unserializedJob);
     }
 
-    /**
-     * @expectedException oat\taoScheduler\model\SchedulerException
-     */
     public function testToPhpCodeException()
     {
+        $this->expectException(SchedulerException::class);
         $job = new Job('FREQ=MONTHLY;COUNT=5', new DateTime('now'), function () {return 'foo';});
         $job->__toPhpCode();
     }
