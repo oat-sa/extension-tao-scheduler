@@ -20,11 +20,11 @@
 
 namespace oat\taoScheduler\test\model\action;
 
+use oat\generis\test\TestCase;
 use oat\taoScheduler\model\action\Action;
 use oat\oatbox\extension\AbstractAction;
 use oat\oatbox\service\ServiceManager;
 use oat\oatbox\action\Action as TaoAction;
-use oat\generis\test\TestCase;
 
 /**
  * Class ActionTest

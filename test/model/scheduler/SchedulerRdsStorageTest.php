@@ -25,6 +25,7 @@ use DateTime;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 use oat\tao\test\TaoPhpUnitTestRunner;
 use oat\oatbox\service\ServiceManager;
+use oat\taoScheduler\model\SchedulerException;
 
 /**
  * Class SchedulerRdsStorageTest
@@ -50,11 +51,9 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
         $this->assertEquals($job->getCallable(), $storage->getJobs()[0]->getCallable());
     }
 
-    /**
-     * @expectedException \oat\taoScheduler\model\SchedulerException
-     */
     public function testAddException()
     {
+        $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
             ->setMethods(['myCallBack'])
@@ -85,11 +84,9 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
         $this->assertEquals(0, count($storage->getJobs()));
     }
 
-    /**
-     * @expectedException \oat\taoScheduler\model\SchedulerException
-     */
     public function testRemoveException()
     {
+        $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
             ->setMethods(['myCallBack'])
