@@ -26,7 +26,7 @@ return [
     'version' => '2.1.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => [
-        'generis' => '>=12.5.0',
+        'generis' => '>=12.15.0',
         'tao' => '>=15.10.0',
         'taoTaskQueue' => '>=1.2.0'
     ],
