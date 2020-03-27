@@ -130,7 +130,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
                 throw new \Exception('foo');
             }));
 
-        $persistenceManager = new \common_persistence_Manager([
+        $persistenceManager = new \oat\generis\persistence\PersistenceManager([
             'persistences' => [
                 'test' => [
                     'driver' => 'no_storage'
