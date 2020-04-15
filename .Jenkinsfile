@@ -49,7 +49,7 @@ pipeline {
                     steps {
                         dir('build'){
                             script {
-                                def b = $BRANCH_NAME
+                                def b = env.BRANCH_NAME
                                 writeFile(file: 'composer.json', text: """{
     "require": {
         "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
