@@ -56,7 +56,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'jenkins_github_token', variable: 'GIT_TOKEN')]) {
                         sh(
                             label: 'Install/Update sources from Composer',
-                            script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer update --no-interaction --no-ansi --no-progress"
+                            script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer update --no-interaction --no-ansi --no-progress --prefer-source"
                         )
                     }
                 }
@@ -101,7 +101,6 @@ pipeline {
                         dir('build'){
                             script {
                                 deps = sh(returnStdout: true, script: "php ./taoDevTools/scripts/depsInfo.php ${EXT_NAME}").trim()
-                                //deps = deps.substring(deps.indexOf('\n')+1);
                                 echo deps
                                 def propsJson = readJSON text: deps
                                 missedDeps = propsJson[EXT_NAME]['missedClasses'].toString()
