@@ -31,8 +31,8 @@ pipeline {
             steps {
                 dir('build') {
                     script {
-                        changeBranch=CHANGE_BRANCH
-                        TEST_BRANCH="${changeBranch:-$BRANCH_NAME}"
+                        def changeBranch=CHANGE_BRANCH
+                        def TEST_BRANCH="${changeBranch:-$BRANCH_NAME}"
                         echo TEST_BRANCH
                         def b = BRANCH_NAME
                         echo b
