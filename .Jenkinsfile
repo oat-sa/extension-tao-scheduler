@@ -31,6 +31,9 @@ pipeline {
             steps {
                 dir('build') {
                     script {
+                        changeBranch=CHANGE_BRANCH
+                        TEST_BRANCH="${changeBranch:-$BRANCH_NAME}"
+                        echo TEST_BRANCH
                         def b = BRANCH_NAME
                         echo b
                         writeFile(file: 'composer.json', text: """
