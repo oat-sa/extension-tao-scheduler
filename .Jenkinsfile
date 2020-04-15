@@ -30,7 +30,24 @@ pipeline {
             }
             steps {
                 dir('build') {
-
+                 script {
+                    def b = BRANCH_NAME
+                    writeFile(file: 'composer.json', text: """{
+    "require": {
+        "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
+        "oat-sa/extension-tao-scheduler" : "dev-${b}"
+    },
+    "minimum-stability": "dev",
+    "require-dev": {
+        "phpunit/phpunit": "~8.5"
+    }
+}
+""")
+                    }
+                    sh(
+                        label: 'Install/Update sources from Composer',
+                        script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer install --no-interaction --no-ansi --no-progress"
+                    )
                 }
             }
         }
@@ -48,25 +65,7 @@ pipeline {
                     }
                     steps {
                         dir('build'){
-                            script {
-                                def b = env.BRANCH_NAME
-                                writeFile(file: 'composer.json', text: """{
-    "require": {
-        "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
-        "oat-sa/extension-tao-scheduler" : "dev-${b}"
-    },
-    "minimum-stability": "dev",
-    "require-dev": {
-        "phpunit/phpunit": "~8.5"
-    }
-}
-""")
-                            }
-                            sh(
-                                label: 'Install/Update sources from Composer',
-                                script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer install --no-interaction --no-ansi --no-progress"
-                            )
-                            script {
+                        script {
                                 deps = sh(returnStdout: true, script: 'php -n taoDevTools\\scripts\\depsInfo.php taoScheduler').trim()
                                 deps = deps.substring(deps.indexOf('\n')+1);
                                 def propsJson = readJSON text: deps
