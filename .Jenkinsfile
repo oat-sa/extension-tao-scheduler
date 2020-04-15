@@ -30,19 +30,21 @@ pipeline {
             }
             steps {
                 dir('build') {
-                 script {
-                    def b = BRANCH_NAME
-                    writeFile(file: 'composer.json', text: """{
-    "require": {
-        "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
-        "oat-sa/extension-tao-scheduler" : "dev-${b}"
-    },
-    "minimum-stability": "dev",
-    "require-dev": {
-        "phpunit/phpunit": "~8.5"
-    }
-}
-""")
+                    script {
+                        def b = BRANCH_NAME
+                        writeFile(file: 'composer.json', text: """
+                        {
+                            "require": {
+                                "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
+                                "oat-sa/extension-tao-scheduler" : "dev-${b}"
+                            },
+                            "minimum-stability": "dev",
+                            "require-dev": {
+                                "phpunit/phpunit": "~8.5"
+                            }
+                        }
+                        """
+                       )
                     }
                     sh(
                         label: 'Install/Update sources from Composer',
