@@ -31,10 +31,11 @@ pipeline {
             steps {
                 dir('build') {
                     script {
+                        def b
                         if (env.CHANGE_BRANCH != null) {
-                            def b = CHANGE_BRANCH
+                            b = CHANGE_BRANCH
                         } else {
-                            def b = BRANCH_NAME
+                            b = BRANCH_NAME
                         }
                         echo b
                         writeFile(file: 'composer.json', text: """
