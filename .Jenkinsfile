@@ -2,13 +2,13 @@ pipeline {
     agent {
         label 'builder'
     }
+    environment {
+        REPO_NAME='oat-sa/extension-tao-scheduler'
+        EXT_NAME='taoScheduler'
+        GITHUB_ORGANIZATION='oat-sa'
+    }
     stages {
         stage('Prepare') {
-            environment {
-                GITHUB_ORGANIZATION='oat-sa'
-                REPO_NAME='oat-sa/extension-tao-scheduler'
-                EXT_NAME='taoScheduler'
-            }
             steps {
                 sh(
                     label : 'Create build build directory',
