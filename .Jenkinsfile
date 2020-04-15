@@ -13,21 +13,6 @@ pipeline {
                     label : 'Create build build directory',
                     script: 'mkdir -p build'
                 )
-
-                withCredentials([string(credentialsId: 'jenkins_github_token', variable: 'GIT_TOKEN')]) {
-                    sh(
-                        label : 'Run the Dependency Resolver',
-                        script: '''
-changeBranch=$CHANGE_BRANCH
-TEST_BRANCH="${changeBranch:-$BRANCH_NAME}"
-echo "select branch : ${TEST_BRANCH}"
-docker run --rm  \\
--e "GITHUB_ORGANIZATION=${GITHUB_ORGANIZATION}" \\
--e "GITHUB_SECRET=${GIT_TOKEN}"  \\
-registry.service.consul:4444/tao/dependency-resolver oat:dependencies:resolve --main-branch ${TEST_BRANCH} --repository-name ${REPO_NAME} > build/composer.json
-                        '''
-                    )
-                }
             }
         }
         stage('Install') {
@@ -45,29 +30,13 @@ registry.service.consul:4444/tao/dependency-resolver oat:dependencies:resolve --
             }
             steps {
                 dir('build') {
-                    sh(
-                        label: 'Install/Update sources from Composer',
-                        script: 'COMPOSER_DISCARD_CHANGES=true composer update --no-interaction --no-ansi --no-progress --no-scripts'
-                    )
-                    sh(
-                        label: 'Add phpunit',
-                        script: 'composer require phpunit/phpunit:^8.5'
-                    )
-                    sh(
-                        label: "Extra filesystem mocks",
-                        script: '''
-mkdir -p taoQtiItem/views/js/mathjax/ && touch taoQtiItem/views/js/mathjax/MathJax.js
-mkdir -p tao/views/locales/en-US/
-    echo "{\\"serial\\":\\"${BUILD_ID}\\",\\"date\\":$(date +%s),\\"version\\":\\"3.3.0-${BUILD_NUMBER}\\",\\"translations\\":{}}" > tao/views/locales/en-US/messages.json
-mkdir -p tao/views/locales/en-US/
-                        '''
-                    )
+
                 }
             }
         }
-        stage('Tests') {
+        stage('Checks') {
             parallel {
-                stage('Backend Tests') {
+                stage('Backend Checks') {
                     agent {
                         docker {
                             image 'alexwijn/docker-git-php-composer'
@@ -79,10 +48,35 @@ mkdir -p tao/views/locales/en-US/
                     }
                     steps {
                         dir('build'){
+                            script {
+                                def b = $BRANCH_NAME
+                                writeFile(file: 'composer.json', text: """{
+    "require": {
+        "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
+        "oat-sa/extension-tao-scheduler" : "dev-${b}"
+    },
+    "minimum-stability": "dev",
+    "require-dev": {
+        "phpunit/phpunit": "~8.5"
+    }
+}
+""")
+                            }
                             sh(
-                                label: 'Run backend tests',
-                                script: './vendor/bin/phpunit taoScheduler/test'
+                                label: 'Install/Update sources from Composer',
+                                script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer install --no-interaction --no-ansi --no-progress"
                             )
+                            script {
+                                deps = sh(returnStdout: true, script: 'php -n taoDevTools\\scripts\\depsInfo.php taoScheduler').trim()
+                                deps = deps.substring(deps.indexOf('\n')+1);
+                                def propsJson = readJSON text: deps
+                                missedDeps = propsJson['missedClasses']['missed'].toString()
+                                try {
+                                    assert missedDeps == "[]"
+                                } catch(Throwable t) {
+                                    error("Missed dependencies found: $missedDeps")
+                                }
+                            }
                         }
                     }
                 }
