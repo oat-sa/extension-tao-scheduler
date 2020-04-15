@@ -98,7 +98,7 @@ pipeline {
                                 //deps = deps.substring(deps.indexOf('\n')+1);
                                 echo deps
                                 def propsJson = readJSON text: deps
-                                missedDeps = propsJson['missedClasses']['missed'].toString()
+                                missedDeps = propsJson['taoScheduler']['missedClasses'].toString()
                                 try {
                                     assert missedDeps == "[]"
                                 } catch(Throwable t) {
