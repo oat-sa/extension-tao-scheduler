@@ -32,6 +32,7 @@ pipeline {
                 dir('build') {
                     script {
                         def b = BRANCH_NAME
+                        echo b
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
@@ -50,36 +51,6 @@ pipeline {
                         label: 'Install/Update sources from Composer',
                         script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer install --no-interaction --no-ansi --no-progress"
                     )
-                }
-            }
-        }
-        stage('Checks') {
-            parallel {
-                stage('Backend Checks') {
-                    agent {
-                        docker {
-                            image 'alexwijn/docker-git-php-composer'
-                            reuseNode true
-                        }
-                    }
-                    options {
-                        skipDefaultCheckout()
-                    }
-                    steps {
-                        dir('build'){
-                        script {
-                                deps = sh(returnStdout: true, script: 'php -n taoDevTools\\scripts\\depsInfo.php taoScheduler').trim()
-                                deps = deps.substring(deps.indexOf('\n')+1);
-                                def propsJson = readJSON text: deps
-                                missedDeps = propsJson['missedClasses']['missed'].toString()
-                                try {
-                                    assert missedDeps == "[]"
-                                } catch(Throwable t) {
-                                    error("Missed dependencies found: $missedDeps")
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
