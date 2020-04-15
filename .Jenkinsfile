@@ -7,6 +7,7 @@ pipeline {
             environment {
                 GITHUB_ORGANIZATION='oat-sa'
                 REPO_NAME='oat-sa/extension-tao-scheduler'
+                EXT_NAME='taoScheduler'
             }
             steps {
                 sh(
@@ -42,7 +43,7 @@ pipeline {
                         {
                             "require": {
                                 "oat-sa/extension-tao-devtools" : "dev-TDR-22/feature/dependency_analyzer",
-                                "oat-sa/extension-tao-scheduler" : "dev-${b}"
+                                "${REPO_NAME}" : "dev-${b}"
                             },
                             "minimum-stability": "dev",
                             "require-dev": {
@@ -77,7 +78,7 @@ pipeline {
                         dir('build'){
                             sh(
                                 label: 'Run backend tests',
-                                script: './vendor/bin/phpunit taoScheduler/test'
+                                script: "./vendor/bin/phpunit ${EXT_NAME}/test"
                             )
                         }
                     }
@@ -99,11 +100,11 @@ pipeline {
                     steps {
                         dir('build'){
                             script {
-                                deps = sh(returnStdout: true, script: "php ./taoDevTools/scripts/depsInfo.php taoScheduler").trim()
+                                deps = sh(returnStdout: true, script: "php ./taoDevTools/scripts/depsInfo.php ${EXT_NAME}").trim()
                                 //deps = deps.substring(deps.indexOf('\n')+1);
                                 echo deps
                                 def propsJson = readJSON text: deps
-                                missedDeps = propsJson['taoScheduler']['missedClasses'].toString()
+                                missedDeps = propsJson[EXT_NAME]['missedClasses'].toString()
                                 try {
                                     assert missedDeps == "[]"
                                 } catch(Throwable t) {
