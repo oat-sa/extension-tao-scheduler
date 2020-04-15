@@ -71,7 +71,7 @@ pipeline {
                     steps {
                         dir('build'){
                             script {
-                                deps = sh(returnStdout: true, script: 'php -n taoDevTools\\scripts\\depsInfo.php taoScheduler').trim()
+                                deps = sh(returnStdout: true, script: "php -n .\\taoDevTools\\scripts\\depsInfo.php taoScheduler").trim()
                                 deps = deps.substring(deps.indexOf('\n')+1);
                                 def propsJson = readJSON text: deps
                                 missedDeps = propsJson['missedClasses']['missed'].toString()
