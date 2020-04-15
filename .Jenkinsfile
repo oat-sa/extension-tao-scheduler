@@ -31,9 +31,11 @@ pipeline {
             steps {
                 dir('build') {
                     script {
-                        def changeBranch = CHANGE_BRANCH
-                        def b = BRANCH_NAME
-                        echo changeBranch
+                        if (binding.hasVariable(CHANGE_BRANCH)) {
+                            def b = CHANGE_BRANCH
+                        } else {
+                            def b = BRANCH_NAME
+                        }
                         echo b
                         writeFile(file: 'composer.json', text: """
                         {
