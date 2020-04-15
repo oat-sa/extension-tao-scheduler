@@ -31,7 +31,7 @@ pipeline {
             steps {
                 dir('build') {
                     script {
-                        if (binding.hasVariable(CHANGE_BRANCH)) {
+                        if (env.CHANGE_BRANCH != null) {
                             def b = CHANGE_BRANCH
                         } else {
                             def b = BRANCH_NAME
