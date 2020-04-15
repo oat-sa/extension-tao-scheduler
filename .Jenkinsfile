@@ -3,7 +3,7 @@ pipeline {
         label 'builder'
     }
     stages {
-        stage('Resolve TAO dependencies') {
+        stage('Prepare') {
             environment {
                 GITHUB_ORGANIZATION='oat-sa'
                 REPO_NAME='oat-sa/extension-tao-scheduler'
@@ -96,6 +96,7 @@ pipeline {
                             script {
                                 deps = sh(returnStdout: true, script: "php ./taoDevTools/scripts/depsInfo.php taoScheduler").trim()
                                 deps = deps.substring(deps.indexOf('\n')+1);
+                                echo deps
                                 def propsJson = readJSON text: deps
                                 missedDeps = propsJson['missedClasses']['missed'].toString()
                                 try {
