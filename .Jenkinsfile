@@ -14,7 +14,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh(
-                    label : 'Create build build directory',
+                    label : 'Create build directory',
                     script: 'mkdir -p build'
                 )
             }
