@@ -43,12 +43,11 @@ pipeline {
                         }
                         env.branch = b
                         echo b
-                        echo GIT_COMMIT
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
                                 "oat-sa/extension-tao-devtools" : "dev-develop",
-                                "${REPO_NAME}" : "dev-${b}"
+                                "${REPO_NAME}" : "dev-${b}#${GIT_COMMIT}"
                             },
                             "minimum-stability": "dev",
                             "require-dev": {
