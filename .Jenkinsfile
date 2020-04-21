@@ -42,7 +42,6 @@ pipeline {
                             b = BRANCH_NAME
                         }
                         env.branch = b
-                        echo b
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
@@ -63,12 +62,6 @@ pipeline {
                             script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer update --no-interaction --no-ansi --no-progress --prefer-source"
                         )
                     }
-                }
-                dir("build/$EXT_NAME"){
-                    sh(
-                        label: 'pull changes',
-                        script: "git pull origin ${env.branch}"
-                    )
                 }
             }
         }
