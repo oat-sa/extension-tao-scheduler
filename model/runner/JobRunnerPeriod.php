@@ -21,7 +21,6 @@
 namespace oat\taoScheduler\model\runner;
 
 use DateTimeInterface;
-use \oat\taoBooklet\model\BookletConfigService;
 
 /**
  * Class JobRunnerPeriod
