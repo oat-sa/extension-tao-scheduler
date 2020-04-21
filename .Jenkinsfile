@@ -41,12 +41,12 @@ pipeline {
                         } else {
                             branch = BRANCH_NAME
                         }
-                        env.branch = b
+                        env.branch = branch
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
                                 "oat-sa/extension-tao-devtools" : "dev-develop",
-                                "${REPO_NAME}" : "dev-${b}#${GIT_COMMIT}"
+                                "${REPO_NAME}" : "dev-${branch}#${GIT_COMMIT}"
                             },
                             "minimum-stability": "dev",
                             "require-dev": {
