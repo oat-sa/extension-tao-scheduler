@@ -36,19 +36,17 @@ pipeline {
                 dir('build') {
                     script {
                         def branch
-                        def commit = GIT_COMMIT;
                         if (env.CHANGE_BRANCH != null) {
                             branch = CHANGE_BRANCH
                         } else {
                             branch = BRANCH_NAME
                         }
                         env.branch = b
-                        echo commit
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
                                 "oat-sa/extension-tao-devtools" : "dev-develop",
-                                "${REPO_NAME}" : "dev-${b}"
+                                "${REPO_NAME}" : "dev-${b}#${GIT_COMMIT}"
                             },
                             "minimum-stability": "dev",
                             "require-dev": {
