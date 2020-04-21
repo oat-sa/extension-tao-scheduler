@@ -35,18 +35,19 @@ pipeline {
             steps {
                 dir('build') {
                     script {
-                        def b
+                        def branch
+                        def commit = GIT_COMMIT;
                         if (env.CHANGE_BRANCH != null) {
-                            b = CHANGE_BRANCH
+                            branch = CHANGE_BRANCH
                         } else {
-                            b = BRANCH_NAME
+                            branch = BRANCH_NAME
                         }
                         env.branch = b
                         writeFile(file: 'composer.json', text: """
                         {
                             "require": {
                                 "oat-sa/extension-tao-devtools" : "dev-develop",
-                                "${REPO_NAME}" : "dev-${b}#${GIT_COMMIT}"
+                                "${REPO_NAME}" : "dev-${b}#${commit}"
                             },
                             "minimum-stability": "dev",
                             "require-dev": {
