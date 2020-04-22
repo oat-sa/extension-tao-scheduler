@@ -13,12 +13,12 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
-                load 'extension-tao-devtools/jenkins/jenkinsInstall'
                 sh(
                     label : 'Create build directory',
                     script: 'mkdir -p build'
                 )
+                git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
+                load 'extension-tao-devtools/jenkins/jenkinsInstall'
             }
         }
         stage('Install') {
