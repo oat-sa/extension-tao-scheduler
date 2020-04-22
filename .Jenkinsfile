@@ -24,6 +24,10 @@ pipeline {
                 dir ('devTools') {
                     git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
                 }
+            }
+        }
+        stage('Install') {
+            dir('build') {
                 load 'devTools/jenkins/jenkinsInstall'
             }
         }
