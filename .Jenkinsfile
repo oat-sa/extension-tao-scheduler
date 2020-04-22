@@ -17,8 +17,14 @@ pipeline {
                     label : 'Create build directory',
                     script: 'mkdir -p build'
                 )
-                git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
-                load 'extension-tao-devtools/jenkins/jenkinsInstall'
+                sh(
+                    label : 'Create devTools directory',
+                    script: 'mkdir -p devTools'
+                )
+                dir ('devTools') {
+                    git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
+                }
+                load 'devTools/jenkins/jenkinsInstall'
             }
         }
         stage('Install') {
