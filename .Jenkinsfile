@@ -17,13 +17,6 @@ pipeline {
                     label : 'Create build directory',
                     script: 'mkdir -p build'
                 )
-                sh(
-                    label : 'Create devTools directory',
-                    script: 'mkdir -p devTools'
-                )
-                dir ('devTools') {
-                    git branch: "TRD-21/common_jenkins_steps", url: 'https://github.com/oat-sa/extension-tao-devtools.git'
-                }
             }
         }
         stage('Install') {
@@ -41,7 +34,34 @@ pipeline {
             }
             steps {
                 dir('build') {
-                    load '../devTools/jenkins/jenkinsInstall'
+                    script {
+                        def branch
+                        if (env.CHANGE_BRANCH != null) {
+                            branch = CHANGE_BRANCH
+                        } else {
+                            branch = BRANCH_NAME
+                        }
+                        env.branch = branch
+                        writeFile(file: 'composer.json', text: """
+                        {
+                            "require": {
+                                "oat-sa/extension-tao-devtools" : "dev-develop",
+                                "${REPO_NAME}" : "dev-${branch}#${GIT_COMMIT}"
+                            },
+                            "minimum-stability": "dev",
+                            "require-dev": {
+                                "phpunit/phpunit": "~8.5"
+                            }
+                        }
+                        """
+                       )
+                    }
+                    withCredentials([string(credentialsId: 'jenkins_github_token', variable: 'GIT_TOKEN')]) {
+                        sh(
+                            label: 'Install/Update sources from Composer',
+                            script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer update --no-interaction --no-ansi --no-progress --prefer-source"
+                        )
+                    }
                 }
             }
         }
