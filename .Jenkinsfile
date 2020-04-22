@@ -27,8 +27,22 @@ pipeline {
             }
         }
         stage('Install') {
-            dir('build') {
-                load 'devTools/jenkins/jenkinsInstall'
+            agent {
+                docker {
+                    image 'alexwijn/docker-git-php-composer'
+                    reuseNode true
+                }
+            }
+            environment {
+                HOME = '.'
+            }
+            options {
+                skipDefaultCheckout()
+            }
+            steps {
+                dir('build') {
+                    load '../devTools/jenkins/jenkinsInstall'
+                }
             }
         }
         stage('Tests') {
