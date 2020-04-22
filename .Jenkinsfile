@@ -27,52 +27,6 @@ pipeline {
                 load 'devTools/jenkins/jenkinsInstall'
             }
         }
-        stage('Install') {
-            agent {
-                docker {
-                    image 'alexwijn/docker-git-php-composer'
-                    reuseNode true
-                }
-            }
-            environment {
-                HOME = '.'
-            }
-            options {
-                skipDefaultCheckout()
-            }
-            steps {
-                dir('build') {
-                    script {
-                        def branch
-                        if (env.CHANGE_BRANCH != null) {
-                            branch = CHANGE_BRANCH
-                        } else {
-                            branch = BRANCH_NAME
-                        }
-                        env.branch = branch
-                        writeFile(file: 'composer.json', text: """
-                        {
-                            "require": {
-                                "oat-sa/extension-tao-devtools" : "dev-develop",
-                                "${REPO_NAME}" : "dev-${branch}#${GIT_COMMIT}"
-                            },
-                            "minimum-stability": "dev",
-                            "require-dev": {
-                                "phpunit/phpunit": "~8.5"
-                            }
-                        }
-                        """
-                       )
-                    }
-                    withCredentials([string(credentialsId: 'jenkins_github_token', variable: 'GIT_TOKEN')]) {
-                        sh(
-                            label: 'Install/Update sources from Composer',
-                            script: "COMPOSER_AUTH='{\"github-oauth\": {\"github.com\": \"$GIT_TOKEN\"}}\' composer update --no-interaction --no-ansi --no-progress --prefer-source"
-                        )
-                    }
-                }
-            }
-        }
         stage('Tests') {
             parallel {
                 stage('Backend Tests') {
