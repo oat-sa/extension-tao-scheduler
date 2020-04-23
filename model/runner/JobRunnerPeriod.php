@@ -21,6 +21,7 @@
 namespace oat\taoScheduler\model\runner;
 
 use DateTimeInterface;
+use oat\taoProctoring\model\ProctorService;
 
 /**
  * Class JobRunnerPeriod
