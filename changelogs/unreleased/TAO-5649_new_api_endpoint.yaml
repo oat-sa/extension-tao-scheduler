@@ -1,7 +1,7 @@
+version: MINOR # MAJOR, MINOR, PATCH
 changes:
   - type: added # changed, removed, added, deprecated, fixed, security
     description: Added new Rest API endpoint
-    version: MINOR # MAJOR, MINOR, PATCH
 
 
 ## [1.2.0] - 2020-07-03
