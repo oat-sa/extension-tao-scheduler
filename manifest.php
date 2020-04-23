@@ -40,9 +40,7 @@ return [
             \oat\taoScheduler\scripts\install\RegisterJobs::class,
         ]
     ],
-    'uninstall' => [
-
-    ],
+    'uninstall' => [],
     'update' => oat\taoScheduler\scripts\update\Updater::class,
     'routes' => [
         '/taoScheduler' => 'oat\\taoScheduler\\controller'
