@@ -1,0 +1,6 @@
+version: # MAJOR, MINOR, PATCH
+changes:
+  - type: # changed, removed, added, deprecated, fixed, security
+    description: # describe your change here
+  - type: # changed, removed, added, deprecated, fixed, security
+    description: # describe your another change here
