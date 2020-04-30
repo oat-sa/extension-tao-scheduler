@@ -114,6 +114,10 @@ pipeline {
                                 }
                             }
                         }
+                        script {
+                            echo sh('pwd')
+                            echo sh('ls')
+                        }
                     }
                 }
             }
