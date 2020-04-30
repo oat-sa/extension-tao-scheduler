@@ -116,9 +116,10 @@ pipeline {
                         }
                         script {
                             composerJson = readJSON text: readFile('composer.json').toString()
-                            if (composerJson['require'].toString().indexOf('":"dev-') != -1) {
-                                echo "dev- dependencies found in composer.json."
-                                sh "exit 1"
+                            try {
+                                assert composerJson['require'].toString().indexOf('":"dev-') != -1
+                            } catch(Throwable t) {
+                                error("dev- dependencies found in composer.json")
                             }
                         }
                     }
