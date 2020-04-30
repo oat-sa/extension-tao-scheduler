@@ -24,10 +24,13 @@ namespace oat\taoScheduler\scripts\install;
 use oat\oatbox\extension\AbstractAction;
 use common_report_Report as Report;
 use oat\oatbox\service\ServiceNotFoundException;
+use oat\taoScheduler\model\job\JobsRegistrator;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\scripts\tools\SchedulerHelper;
 use DateTime;
 use DateTimeZone;
+use common_ext_ExtensionsManager as ExtensionsManager;
+use common_ext_Extension as Extension;
 
 /**
  * Class RegisterJobs
@@ -36,22 +39,27 @@ use DateTimeZone;
 class RegisterJobs extends AbstractAction
 {
     /**
-     * @param $params
      * @return Report
      * @throws \common_Exception
      */
     public function __invoke($params)
     {
-        try {
-            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
-        } catch (ServiceNotFoundException $e) {
-            return new Report(Report::TYPE_WARNING, __('Scheduler service not found'));
+        /** @var ExtensionsManager $extManager */
+        $extManager = $this->getServiceManager()->get(ExtensionsManager::SERVICE_ID);
+        /** @var SchedulerService $scheduler */
+        $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
+        foreach ($scheduler->getJobs() as $job) {
+            $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
         }
-        $scheduler->attach(
-            '0 0 * * *',
-            new DateTime('now', new DateTimeZone('utc')),
-            SchedulerHelper::class, ['removeExpiredJobs', false]
-        );
-        return new Report(Report::TYPE_SUCCESS, __('Jobs successfully scheduled'));
+        /** @var Extension $extension */
+        foreach ($extManager->getInstalledExtensions() as $extension) {
+            $updaterHandler = $extension->getManifest()->getUpdateHandler();
+            if (is_subclass_of($updaterHandler, JobsRegistrator::class)) {
+                $updaterHandler = new $updaterHandler($extension);
+                foreach ($updaterHandler->getJobs() as $job) {
+                    $scheduler->attach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
+                }
+            }
+        }
     }
 }

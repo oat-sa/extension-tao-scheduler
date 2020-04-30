@@ -23,9 +23,12 @@ namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
 use oat\taoScheduler\model\inspector\RdsActionInspector;
+use oat\taoScheduler\model\job\Job;
+use oat\taoScheduler\model\job\JobsRegistrator;
 use oat\taoScheduler\model\runner\JobRunnerService;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
+use oat\taoScheduler\scripts\install\RegisterJobs;
 use oat\taoScheduler\scripts\tools\SchedulerHelper;
 use oat\taoScheduler\scripts\update\dbMigrations\Version20190422114045;
 use DateTime;
@@ -36,7 +39,7 @@ use DateTimeZone;
  *
  * @author Aleh Hutnikau <hutnikau@1pt.com>
  */
-class Updater extends common_ext_ExtensionUpdater
+class Updater extends common_ext_ExtensionUpdater implements JobsRegistrator
 {
     public function update($initialVersion)
     {
@@ -109,5 +112,29 @@ class Updater extends common_ext_ExtensionUpdater
             $this->setVersion('1.1.0');
         }
         $this->skip('1.1.0', '2.1.2');
+
+        $this->registerJobs();
+    }
+
+    private function registerJobs()
+    {
+        $action = new RegisterJobs();
+        $action->setServiceLocator($this->getServiceManager());
+        return $action([]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJobs(): array
+    {
+        return [
+            new Job(
+                '0 0 * * *',
+                new DateTime('now', new DateTimeZone('utc')),
+                SchedulerHelper::class,
+                ['removeExpiredJobs', false]
+            ),
+        ];
     }
 }

@@ -24,11 +24,6 @@
     "extra": {
         "tao-extension-name": "taoScheduler"
     },
-    "scripts": {
-        "post-update-cmd" : [
-            "\\oat\\taoScheduler\\scripts\\update\\RegisterJobs"
-        ]
-    },
     "minimum-stability": "dev",
     "require": {
         "php" : ">=5.6",
