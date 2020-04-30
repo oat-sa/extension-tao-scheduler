@@ -115,8 +115,11 @@ pipeline {
                             }
                         }
                         script {
-                            echo sh('pwd')
-                            echo sh('ls')
+                            composerJson = readJSON text: readFile('composer.json').toString()
+                            if (composerJson['require'].toString().indexOf('":"dev-') != -1) {
+                                echo "dev- dependencies found in composer.json."
+                                sh "exit 1"
+                            }
                         }
                     }
                 }
