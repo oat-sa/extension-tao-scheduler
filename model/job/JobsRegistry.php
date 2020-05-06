@@ -24,10 +24,10 @@ namespace oat\taoScheduler\model\job;
  * Interface must be implemented by updater script of an extension
  * in case if any jobs needs to be registered by extension.
  *
- * Interface JobsRegistrator
+ * Interface JobsRegistry
  * @package oat\taoScheduler\model\job
  */
-interface JobsRegistrator
+interface JobsRegistry
 {
     /**
      * @return JobInterface[]

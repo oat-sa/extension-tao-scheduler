@@ -23,7 +23,7 @@ return [
     'label' => 'Job Scheduler',
     'description' => 'TAO job scheduler',
     'license' => 'GPL-2.0',
-    'version' => '2.1.2',
+    'version' => '2.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => [
         'generis' => '>=12.15.0',
@@ -36,14 +36,14 @@ return [
     ],
     'install' => [
         'php' => [
-            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
-            \oat\taoScheduler\scripts\install\RegisterJobs::class,
+            oat\taoScheduler\scripts\install\RegisterRdsStorage::class
         ]
     ],
     'uninstall' => [
 
     ],
     'update' => oat\taoScheduler\scripts\update\Updater::class,
+    'postUpdate' => oat\taoScheduler\scripts\update\PostUpdater::class,
     'routes' => [
         '/taoScheduler' => 'oat\\taoScheduler\\controller'
     ],

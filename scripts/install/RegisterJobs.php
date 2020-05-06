@@ -24,13 +24,14 @@ namespace oat\taoScheduler\scripts\install;
 use oat\oatbox\extension\AbstractAction;
 use common_report_Report as Report;
 use oat\oatbox\service\ServiceNotFoundException;
-use oat\taoScheduler\model\job\JobsRegistrator;
+use oat\taoScheduler\model\job\JobsRegistry;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\scripts\tools\SchedulerHelper;
 use DateTime;
 use DateTimeZone;
 use common_ext_ExtensionsManager as ExtensionsManager;
 use common_ext_Extension as Extension;
+use oat\oatbox\service\exception\InvalidServiceManagerException;
 
 /**
  * Class RegisterJobs
@@ -44,22 +45,36 @@ class RegisterJobs extends AbstractAction
      */
     public function __invoke($params)
     {
+        $this->detachAllJobs();
         /** @var ExtensionsManager $extManager */
         $extManager = $this->getServiceManager()->get(ExtensionsManager::SERVICE_ID);
-        /** @var SchedulerService $scheduler */
-        $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
-        foreach ($scheduler->getJobs() as $job) {
-            $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
-        }
+        $scheduler = $this->getScheduler();
         /** @var Extension $extension */
         foreach ($extManager->getInstalledExtensions() as $extension) {
-            $updaterHandler = $extension->getManifest()->getUpdateHandler();
-            if (is_subclass_of($updaterHandler, JobsRegistrator::class)) {
-                $updaterHandler = new $updaterHandler($extension);
-                foreach ($updaterHandler->getJobs() as $job) {
+            $postUpdaterClass = $extension->getManifest()->getPostUpdateHandler();
+            if (is_subclass_of($postUpdaterClass, JobsRegistry::class)) {
+                $postUpdater = new $postUpdaterClass($extension);
+                foreach ($postUpdater->getJobs() as $job) {
                     $scheduler->attach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
                 }
             }
         }
+    }
+
+    private function detachAllJobs()
+    {
+        $scheduler = $this->getScheduler();
+        foreach ($scheduler->getJobs() as $job) {
+            $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
+        }
+    }
+
+    /**
+     * @return SchedulerService
+     * @throws InvalidServiceManagerException
+     */
+    private function getScheduler()
+    {
+        return $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
     }
 }
