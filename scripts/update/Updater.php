@@ -39,7 +39,7 @@ use DateTimeZone;
  *
  * @author Aleh Hutnikau <hutnikau@1pt.com>
  */
-class Updater extends common_ext_ExtensionUpdater
+class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
 {
     public function update($initialVersion)
     {
@@ -112,5 +112,29 @@ class Updater extends common_ext_ExtensionUpdater
             $this->setVersion('1.1.0');
         }
         $this->skip('1.1.0', '2.2.0');
+
+    }
+
+    public function postUpdate()
+    {
+        parent::postUpdate();
+        $action = new RegisterJobs();
+        $action->setServiceLocator($this->getServiceManager());
+        return $action([]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getJobs(): array
+    {
+        return [
+            new Job(
+                '0 0 * * *',
+                new DateTime('now', new DateTimeZone('utc')),
+                SchedulerHelper::class,
+                ['removeExpiredJobs', false]
+            ),
+        ];
     }
 }

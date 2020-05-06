@@ -51,10 +51,10 @@ class RegisterJobs extends AbstractAction
         $scheduler = $this->getScheduler();
         /** @var Extension $extension */
         foreach ($extManager->getInstalledExtensions() as $extension) {
-            $postUpdaterClass = $extension->getManifest()->getPostUpdateHandler();
-            if (is_subclass_of($postUpdaterClass, JobsRegistry::class)) {
-                $postUpdater = new $postUpdaterClass($extension);
-                foreach ($postUpdater->getJobs() as $job) {
+            $updaterClass = $extension->getManifest()->getUpdateHandler();
+            if (is_subclass_of($updaterClass, JobsRegistry::class)) {
+                $updater = new $updaterClass($extension);
+                foreach ($updater->getJobs() as $job) {
                     $scheduler->attach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
                 }
             }

@@ -36,14 +36,14 @@ return [
     ],
     'install' => [
         'php' => [
-            oat\taoScheduler\scripts\install\RegisterRdsStorage::class
+            oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
+            oat\taoScheduler\scripts\install\RegisterJobs::class,
         ]
     ],
     'uninstall' => [
 
     ],
     'update' => oat\taoScheduler\scripts\update\Updater::class,
-    'postUpdate' => oat\taoScheduler\scripts\update\PostUpdater::class,
     'routes' => [
         '/taoScheduler' => 'oat\\taoScheduler\\controller'
     ],
