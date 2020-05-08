@@ -23,12 +23,8 @@ namespace oat\taoScheduler\scripts\install;
 
 use oat\oatbox\extension\AbstractAction;
 use common_report_Report as Report;
-use oat\oatbox\service\ServiceNotFoundException;
 use oat\taoScheduler\model\job\JobsRegistry;
 use oat\taoScheduler\model\scheduler\SchedulerService;
-use oat\taoScheduler\scripts\tools\SchedulerHelper;
-use DateTime;
-use DateTimeZone;
 use common_ext_ExtensionsManager as ExtensionsManager;
 use common_ext_Extension as Extension;
 use oat\oatbox\service\exception\InvalidServiceManagerException;
@@ -59,6 +55,7 @@ class RegisterJobs extends AbstractAction
                 }
             }
         }
+        return new Report(Report::TYPE_SUCCESS, 'taoScheduler: Scheduled jobs has been updated');
     }
 
     private function detachAllJobs()

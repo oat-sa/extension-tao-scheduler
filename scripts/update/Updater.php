@@ -19,6 +19,8 @@
  *
  */
 
+declare(strict_types = 1);
+
 namespace oat\taoScheduler\scripts\update;
 
 use common_ext_ExtensionUpdater;
@@ -33,6 +35,7 @@ use oat\taoScheduler\scripts\tools\SchedulerHelper;
 use oat\taoScheduler\scripts\update\dbMigrations\Version20190422114045;
 use DateTime;
 use DateTimeZone;
+use common_report_Report as Report;
 
 /**
  * Class Updater
@@ -115,7 +118,7 @@ class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
 
     }
 
-    public function postUpdate()
+    public function postUpdate(): ?Report
     {
         parent::postUpdate();
         $action = new RegisterJobs();
@@ -130,7 +133,7 @@ class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
     {
         return [
             new Job(
-                '0 0 * * *',
+                '0 1 * * *',
                 new DateTime('now', new DateTimeZone('utc')),
                 SchedulerHelper::class,
                 ['removeExpiredJobs', false]
