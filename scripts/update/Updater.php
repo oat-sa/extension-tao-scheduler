@@ -101,21 +101,14 @@ class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
         $this->skip('0.9.0', '1.0.1');
 
         if ($this->isVersion('1.0.1')) {
-            /** @var SchedulerService $scheduler */
-            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
-            $scheduler->attach(
-                '0 0 * * *',
-                new DateTime('now', new DateTimeZone('utc')),
-                SchedulerHelper::class, ['removeExpiredJobs', false]
-            );
             $migration = new Version20190422114045();
             $migration->setServiceLocator($this->getServiceManager());
             $migration([]);
 
             $this->setVersion('1.1.0');
         }
-        $this->skip('1.1.0', '2.2.0');
 
+        $this->skip('1.1.0', '2.3.0');
     }
 
     public function postUpdate(): ?Report
