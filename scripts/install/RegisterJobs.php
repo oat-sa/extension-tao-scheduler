@@ -23,11 +23,7 @@ namespace oat\taoScheduler\scripts\install;
 
 use oat\oatbox\extension\AbstractAction;
 use common_report_Report as Report;
-use oat\taoScheduler\model\job\JobsRegistry;
-use oat\taoScheduler\model\scheduler\SchedulerService;
-use common_ext_ExtensionsManager as ExtensionsManager;
-use common_ext_Extension as Extension;
-use oat\oatbox\service\exception\InvalidServiceManagerException;
+use oat\taoScheduler\model\scheduler\SchedulerJobsRegistry;
 
 /**
  * Class RegisterJobs
@@ -41,37 +37,9 @@ class RegisterJobs extends AbstractAction
      */
     public function __invoke($params)
     {
-        $this->detachAllJobs();
-        /** @var ExtensionsManager $extManager */
-        $extManager = $this->getServiceManager()->get(ExtensionsManager::SERVICE_ID);
-        $scheduler = $this->getScheduler();
-        /** @var Extension $extension */
-        foreach ($extManager->getInstalledExtensions() as $extension) {
-            $updaterClass = $extension->getManifest()->getUpdateHandler();
-            if (is_subclass_of($updaterClass, JobsRegistry::class)) {
-                $updater = new $updaterClass($extension);
-                foreach ($updater->getJobs() as $job) {
-                    $scheduler->attach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
-                }
-            }
-        }
-        return new Report(Report::TYPE_SUCCESS, 'taoScheduler: Scheduled jobs has been updated');
-    }
-
-    private function detachAllJobs()
-    {
-        $scheduler = $this->getScheduler();
-        foreach ($scheduler->getJobs() as $job) {
-            $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
-        }
-    }
-
-    /**
-     * @return SchedulerService
-     * @throws InvalidServiceManagerException
-     */
-    private function getScheduler()
-    {
-        return $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
+        /** @var SchedulerJobsRegistry $schedulerJobsRegistry */
+        $schedulerJobsRegistry = $this->getServiceManager()->get(SchedulerJobsRegistry::SERVICE_ID);
+        $registeredJobs = $schedulerJobsRegistry->update();
+        return new Report(Report::TYPE_SUCCESS, sprintf('taoScheduler: %d Scheduled jobs was registered', count($registeredJobs)));
     }
 }

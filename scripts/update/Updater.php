@@ -41,7 +41,6 @@ use common_report_Report as Report;
  * Class Updater
  *
  * @author Aleh Hutnikau <hutnikau@1pt.com>
- * @deprecated use migrations instead. See https://github.com/oat-sa/generis/wiki/Tao-Update-Process
  */
 class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
 {
@@ -117,6 +116,11 @@ class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
         $this->setVersion($this->getExtension()->getManifest()->getVersion());
     }
 
+    /**
+     * @return Report|null
+     * @throws \common_Exception
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
     public function postUpdate(): ?Report
     {
         parent::postUpdate();
