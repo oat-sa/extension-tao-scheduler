@@ -41,6 +41,7 @@ use common_report_Report as Report;
  * Class Updater
  *
  * @author Aleh Hutnikau <hutnikau@1pt.com>
+ * @deprecated use migrations instead. See https://github.com/oat-sa/generis/wiki/Tao-Update-Process
  */
 class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
 {
@@ -108,7 +109,12 @@ class Updater extends common_ext_ExtensionUpdater implements JobsRegistry
             $this->setVersion('1.1.0');
         }
 
-        $this->skip('1.1.0', '2.3.0');
+        $this->skip('1.1.0', '2.2.0');
+
+        //Updater files are deprecated. Please use migrations.
+        //See: https://github.com/oat-sa/generis/wiki/Tao-Update-Process
+
+        $this->setVersion($this->getExtension()->getManifest()->getVersion());
     }
 
     public function postUpdate(): ?Report
