@@ -53,6 +53,13 @@ class Job implements JobInterface
     private $params;
 
     /**
+     * @var int
+     * @see JobInterface::TYPE_CONFIG
+     * @see JobInterface::TYPE_DYNAMIC
+     */
+    private $type;
+
+    /**
      * Schedule an event
      *
      * @param string $rRule Recurrence rule: iCalendar (@see https://tools.ietf.org/html/rfc5545#section-3.3.10) or Cron syntax
@@ -60,13 +67,15 @@ class Job implements JobInterface
      * @param $callback Callback to be executed.
      *                  Also can be an array with tao service identifier and method name (e.g. ['taoExt/MyService', 'doSomething'])
      * @param array $params Parameters to be passed to callback
+     * @param int $type Type of Job (configuration or dynamic)
      */
-    public function __construct($rRule, DateTimeInterface $startTime, $callback, $params = [])
+    public function __construct($rRule, DateTimeInterface $startTime, $callback, $params = [], int $type = self::TYPE_CONFIG)
     {
         $this->rRule = $rRule;
         $this->startTime = $startTime;
         $this->callback = $callback;
         $this->params = $params;
+        $this->type = $type;
     }
 
     /**
@@ -110,19 +119,29 @@ class Job implements JobInterface
         return '[\'' . $this->getRRule() . '\', '
             . $this->getStartTime()->getTimestamp() . ','
             . $callbackPhpCode . ','
-            . \common_Utils::toPHPVariableString($this->getParams())
+            . \common_Utils::toPHPVariableString($this->getParams()) . ','
+            . $this->getType()
         . ']';
     }
 
     /**
+     * @return int
+     */
+    public function getType()
+    {
+        return $this->type === null ? self::TYPE_CONFIG : $this->type;
+    }
+
+    /**
      * @param string $json
-     * @return JobInterface
+     * @return JobInterface|static
+     * @throws \Exception
      */
     public static function restore($json)
     {
         $arr = json_decode($json, true);
         eval('$callback='.$arr['callback'].';');
-        return new static($arr['rrule'], new \DateTime('@'.$arr['startTime']), $callback, $arr['params']);
+        return new static($arr['rrule'], new \DateTime('@'.$arr['startTime']), $callback, $arr['params'], $arr['type']);
     }
 
     /**
@@ -163,12 +182,12 @@ class Job implements JobInterface
     public function jsonSerialize()
     {
         $callbackPhpCode = $this->getPhpCode($this->getCallable());
-        $arr = [
+        return [
             'rrule' => $this->getRRule(),
             'startTime' => $this->getStartTime()->getTimestamp(),
             'callback' => $callbackPhpCode,
             'params' => $this->getParams(),
+            'type' => $this->getType(),
         ];
-        return $arr;
     }
 }

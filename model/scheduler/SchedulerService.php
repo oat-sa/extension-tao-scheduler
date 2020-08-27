@@ -23,6 +23,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoScheduler\model\job\Job;
 use DateTimeInterface;
 use oat\oatbox\log\LoggerAwareTrait;
+use oat\taoScheduler\model\job\JobInterface;
 use Scheduler\Scheduler;
 use Scheduler\Job\Job as SchedulerJob;
 use oat\taoScheduler\model\action\Action;
@@ -49,18 +50,18 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     /**
      * @inheritdoc
      */
-    public function attach($rRule, DateTimeInterface $startTime, $callback, $params = [])
+    public function attach($rRule, DateTimeInterface $startTime, $callback, $params = [], $type = JobInterface::TYPE_CONFIG)
     {
-        $job = new Job($rRule, $startTime, $callback, $params);
+        $job = new Job($rRule, $startTime, $callback, $params, $type);
         return $this->getStorage()->add($job);
     }
 
     /**
      * @inheritdoc
      */
-    public function detach($rRule, DateTimeInterface $startTime, $callback, $params = [])
+    public function detach($rRule, DateTimeInterface $startTime, $callback, $params = [], $type = JobInterface::TYPE_CONFIG)
     {
-        $jobToRemove = new Job($rRule, $startTime, $callback, $params);
+        $jobToRemove = new Job($rRule, $startTime, $callback, $params, $type);
         return $this->getStorage()->remove($jobToRemove);
     }
 

@@ -31,6 +31,21 @@ interface JobInterface extends PhpSerializable, \JsonSerializable
 {
 
     /**
+     * @var int
+     * Job of this type is part of configuration of application.
+     * Must be scheduled during installation of some extension.
+     * For example: termination of expired test sessions.
+     */
+    public const TYPE_CONFIG = 0;
+
+    /**
+     * @var int
+     * Job of this type can be dynamically added during program execution.
+     * For example: resend results in 5 minutes in case if previous submission was failed.
+     */
+    public const TYPE_DYNAMIC = 1;
+
+    /**
      * @return string
      */
     public function getRRule();
@@ -49,6 +64,11 @@ interface JobInterface extends PhpSerializable, \JsonSerializable
      * @return array
      */
     public function getParams();
+
+    /**
+     * @return mixed
+     */
+    public function getType();
 
     /**
      * Restore Job from json

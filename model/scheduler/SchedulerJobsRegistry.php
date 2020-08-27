@@ -42,7 +42,7 @@ class SchedulerJobsRegistry extends ConfigurableService
     public function update()
     {
         $jobs = [];
-        $this->detachAllJobs();
+        $this->detachConfigJobs();
         /** @var ExtensionsManager $extManager */
         $extManager = $this->getServiceLocator()->get(ExtensionsManager::SERVICE_ID);
         $scheduler = $this->getScheduler();
@@ -68,11 +68,13 @@ class SchedulerJobsRegistry extends ConfigurableService
      * Detach all registered jobs
      * @throws InvalidServiceManagerException
      */
-    private function detachAllJobs()
+    private function detachConfigJobs()
     {
         $scheduler = $this->getScheduler();
         foreach ($scheduler->getJobs() as $job) {
-            $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
+            if ($job->getType() === JobInterface::TYPE_CONFIG) {
+                $scheduler->detach($job->getRRule(), $job->getStartTime(), $job->getCallable(), $job->getParams());
+            }
         }
     }
 

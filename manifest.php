@@ -38,6 +38,7 @@ return [
         'php' => [
             oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
             oat\taoScheduler\scripts\install\RegisterJobs::class,
+            oat\taoScheduler\scripts\install\RegisterEvents::class
         ]
     ],
     'uninstall' => [
