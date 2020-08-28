@@ -20,6 +20,7 @@
 
 namespace oat\taoScheduler\model\scheduler;
 
+use oat\generis\persistence\PersistenceManager;
 use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\job\Job;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -101,6 +102,14 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     }
 
     /**
+     * @return string
+     */
+    public function getPersistenceId()
+    {
+        return $this->persistenceId;
+    }
+
+    /**
      * Check if job exists in the storage
      * @param JobInterface $job
      * @return bool
@@ -139,11 +148,12 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     /**
      * Initialize log storage
      *
-     * @param \common_persistence_Persistence $persistence
      * @return \common_report_Report
      */
-    public static function install($persistence)
+    public function install()
     {
+        $persistence = $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)
+            ->getPersistenceById($this->persistenceId);
         $schemaManager = $persistence->getDriver()->getSchemaManager();
         $schema = $schemaManager->createSchema();
         $fromSchema = clone $schema;
@@ -163,5 +173,13 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         }
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('RDS scheduler storage successfully installed'));
+    }
+
+    /**
+     * @return string
+     */
+    public function __toPhpCode()
+    {
+        return 'new ' . get_class($this) . '(' . $this->persistenceId . ')';
     }
 }

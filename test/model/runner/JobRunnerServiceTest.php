@@ -109,7 +109,6 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
 
         $persistenceManager = $this->getSqlMock('test_scheduler');
         $persistence = $persistenceManager->getPersistenceById('test_scheduler');
-        SchedulerRdsStorage::install($persistence);
         RdsActionInspector::initDatabase($persistence);
 
         $callbackMock = $this->getMockBuilder('\stdClass')
@@ -154,6 +153,9 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $config->set('errorcallback/mock', $errorCallbackMock);
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
+        $schedulerRdsStorage = new SchedulerRdsStorage('test_scheduler');
+        $schedulerRdsStorage->setServiceLocator($serviceManager);
+        $schedulerRdsStorage->install();
         return $serviceManager;
     }
 

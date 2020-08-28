@@ -14,29 +14,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
+ * Copyright (c) 2020 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
  *
  */
 
-namespace oat\taoScheduler\test\model\scheduler;
+namespace oat\taoScheduler\model\scheduler;
 
-use oat\taoScheduler\model\job\Job;
-use DateTime;
-use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\persistence\PersistenceManager;
+use oat\generis\test\TestCase;
+use oat\oatbox\cache\SimpleCache;
 use oat\oatbox\service\ServiceManager;
+use oat\taoScheduler\model\job\JobInterface;
+use oat\taoScheduler\model\job\Job;
+use org\bovigo\vfs\vfsStream;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use oat\taoScheduler\model\SchedulerException;
+use DateTime;
 
 /**
- * Class SchedulerRdsStorageTest
- * @package oat\taoScheduler
+ * Class SchedulerRdsStorage
+ * @package oat\taoScheduler\model\scheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
+class StorageAggregatorTest extends TestCase
 {
-    private $persistence;
-    private $service;
-
     public function testAdd()
     {
         $storage = $this->getStorage();
@@ -49,6 +50,11 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
         $this->assertEquals($job->getStartTime(), $storage->getJobs()[0]->getStartTime());
         $this->assertEquals($job->getRRule(), $storage->getJobs()[0]->getRRule());
         $this->assertEquals($job->getCallable(), $storage->getJobs()[0]->getCallable());
+
+        $job = new Job('5 * * * *', new DateTime('@'.time()), 'time', ['foo', 'bar']);
+        $this->assertTrue($storage->add($job, false));
+
+        $this->assertEquals(2, count($storage->getJobs()));
     }
 
     public function testAddException()
@@ -72,7 +78,7 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
 
         $this->assertEquals(0, count($storage->getJobs()));
         $this->assertTrue($storage->add($job1));
-        $this->assertTrue($storage->add($job2));
+        $this->assertTrue($storage->add($job2, false));
         $this->assertEquals(2, count($storage->getJobs()));
         $this->assertTrue($storage->remove($job2));
         $this->assertEquals(1, count($storage->getJobs()));
@@ -96,22 +102,47 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
         $storage->remove($job);
     }
 
-    /**
-     * @throws
-     * @return SchedulerRdsStorage
-     */
-    protected function getStorage()
+    private function getLocatorMock()
     {
-        if ($this->service === null) {
-            $persistenceManager = $this->getSqlMock('test_scheduler');
-            $this->persistence = $persistenceManager->getPersistenceById('test_scheduler');
-            $this->service = new SchedulerRdsStorage('test_scheduler');
-            $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
-            $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
-            $serviceManager = new ServiceManager($config);
-            $this->service->setServiceLocator($serviceManager);
-            $this->service->install();
-        }
-        return $this->service;
+        $persistenceManager = $this->getSqlMock('test_scheduler');
+        $sqlPersistence = $persistenceManager->getPersistenceById('test_scheduler');
+
+        vfsStream::setup('cache');
+        $params = [
+            'dir' => vfsStream::url('cache'),
+        ];
+        $driver = new \common_persistence_PhpFileDriver();
+        $persistence = $driver->connect('test', $params);
+        $persistenceManager = $this->getMockBuilder(PersistenceManager::class)->getMock();
+        $persistenceManager->method('getPersistenceById')->will($this->returnValueMap([
+            ['cache', $persistence],
+            ['test_scheduler', $sqlPersistence]
+        ]));
+        $simpleCache = new \oat\oatbox\cache\KeyValueCache(array(
+            'persistence' => 'cache'
+        ));
+        $serviceLocator = $this->getServiceLocatorMock([
+            SimpleCache::SERVICE_ID => $simpleCache,
+            PersistenceManager::SERVICE_ID => $persistenceManager
+        ]);
+        $simpleCache->setServiceLocator($serviceLocator);
+        return $serviceLocator;
+    }
+
+    /**
+     * @return StorageAggregator
+     */
+    private function getStorage()
+    {
+        $serviceLocator = $this->getLocatorMock();
+
+        $rdsStorage = new SchedulerRdsStorage('test_scheduler');
+        $cacheStorage = new SchedulerCacheStorage();
+        $rdsStorage->setServiceLocator($serviceLocator);
+        $cacheStorage->setServiceLocator($serviceLocator);
+        $storageAggregator = new StorageAggregator($rdsStorage, $cacheStorage);
+        $storageAggregator->setServiceLocator($serviceLocator);
+        $storageAggregator->install();
+        return $storageAggregator;
     }
 }
