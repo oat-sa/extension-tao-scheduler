@@ -180,6 +180,6 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
      */
     public function __toPhpCode()
     {
-        return 'new ' . get_class($this) . '(' . $this->persistenceId . ')';
+        return 'new ' . get_class($this) . '(\'' . $this->persistenceId . '\')';
     }
 }

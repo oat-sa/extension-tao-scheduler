@@ -97,8 +97,22 @@ class StorageAggregator implements SchedulerStorageInterface
      */
     public function install()
     {
+        $this->permanentStorage->setServiceLocator($this->getServiceLocator());
+        $this->cacheStorage->setServiceLocator($this->getServiceLocator());
         $this->permanentStorage->install();
         $this->cacheStorage->install();
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('Scheduler storage aggregator installed'));
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see \oat\oatbox\PhpSerializable::__toPhpCode()
+     */
+    public function __toPhpCode()
+    {
+        return 'new ' . get_class($this) . '(' . PHP_EOL
+            . \common_Utils::toHumanReadablePhpString($this->permanentStorage) . ', ' . PHP_EOL
+            . \common_Utils::toHumanReadablePhpString($this->cacheStorageStorage) . PHP_EOL
+            . ')';
     }
 }

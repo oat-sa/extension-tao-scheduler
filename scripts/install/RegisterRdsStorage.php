@@ -60,6 +60,7 @@ class RegisterRdsStorage extends AbstractAction
         $schedulerStorageClass = $schedulerService->getOption(SchedulerService::OPTION_JOBS_STORAGE);
         $schedulerStorageOptions = $schedulerService->getOption(SchedulerService::OPTION_JOBS_STORAGE_PARAMS);
         $storage = new $schedulerStorageClass(...$schedulerStorageOptions);
+        $storage->setServiceLocator($this->getServiceLocator());
         $storage->install();
         $this->initActionInspector();
         $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $schedulerService);

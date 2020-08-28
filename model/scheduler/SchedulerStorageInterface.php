@@ -20,16 +20,17 @@
 
 namespace oat\taoScheduler\model\scheduler;
 
-use \oat\taoScheduler\model\job\JobInterface;
+use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\SchedulerException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use oat\oatbox\PhpSerializable;
 
 /**
  * Interface SchedulerStorageInterface
  * @package oat\taoScheduler\model\scheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-interface SchedulerStorageInterface extends ServiceLocatorAwareInterface
+interface SchedulerStorageInterface extends ServiceLocatorAwareInterface, PhpSerializable
 {
 
     /**
