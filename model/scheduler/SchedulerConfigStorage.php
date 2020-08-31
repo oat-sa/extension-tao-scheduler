@@ -21,22 +21,28 @@
 namespace oat\taoScheduler\model\scheduler;
 
 use oat\oatbox\cache\SimpleCache;
+use oat\taoNccer\model\registry\eventAnonymizer\AbstractEventAnonymizer;
 use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\job\Job;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use oat\taoScheduler\model\SchedulerException;
 use Psr\SimpleCache\InvalidArgumentException;
+use common_ext_ExtensionsManager as ExtensionsManager;
+use common_ext_Extension as Extension;
 
 /**
- * Class SchedulerRdsStorage
+ * Class SchedulerConfigStorage
+ * Storage fetches scheduled jobs from installed extensions configuration
+ *
  * @package oat\taoScheduler\model\scheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerCacheStorage implements SchedulerStorageInterface
+class SchedulerConfigStorage implements SchedulerStorageInterface
 {
     use ServiceLocatorAwareTrait;
 
     const CACHE_KEY = 'SchedulerJobsStorage';
+    const MANIFEST_KEY = 'scheduledJobs';
 
     /**
      * @inheritDoc
@@ -113,6 +119,26 @@ class SchedulerCacheStorage implements SchedulerStorageInterface
     public function install()
     {
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('Cache scheduler storage installed'));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function refreshJobs(): bool
+    {
+        $this->getPersistence()->delete(self::CACHE_KEY);
+        $extManager = $this->getServiceLocator()->get(ExtensionsManager::SERVICE_ID);
+        /** @var Extension $extension */
+        foreach ($extManager->getInstalledExtensions() as $extension) {
+            $jobsConfigClass = $extension->getManifest()->getExtra()[self::MANIFEST_KEY] ?? null;
+            if ($jobsConfigClass && is_subclass_of($jobsConfigClass, JobsConfig::class)) {
+                $jobsConfig = new $jobsConfigClass();
+                foreach ($jobsConfig->getJobs() as $job) {
+                    $this->add($job);
+                }
+            }
+        }
+        return true;
     }
 
     /**

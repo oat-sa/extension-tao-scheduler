@@ -21,37 +21,29 @@
 
 namespace oat\taoScheduler\scripts\install;
 
-use oat\oatbox\extension\AbstractAction;
-use common_report_Report as Report;
-use oat\oatbox\service\ServiceNotFoundException;
-use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\scripts\tools\SchedulerHelper;
+use oat\taoScheduler\model\scheduler\JobsConfig as JobsConfigInterface;
 use DateTime;
 use DateTimeZone;
-
+use oat\taoScheduler\model\job\Job;
 /**
  * Class RegisterJobs
  * @package oat\taoScheduler\scripts\install
  */
-class RegisterJobs extends AbstractAction
+class JobsConfig implements JobsConfigInterface
 {
     /**
-     * @param $params
-     * @return Report
-     * @throws \common_Exception
+     * @inheritDoc
      */
-    public function __invoke($params)
+    public function getJobs():array
     {
-        try {
-            $scheduler = $this->getServiceManager()->get(SchedulerService::SERVICE_ID);
-        } catch (ServiceNotFoundException $e) {
-            return new Report(Report::TYPE_WARNING, __('Scheduler service not found'));
-        }
-        $scheduler->attach(
-            '0 0 * * *',
-            new DateTime('now', new DateTimeZone('utc')),
-            SchedulerHelper::class, ['removeExpiredJobs', false]
-        );
-        return new Report(Report::TYPE_SUCCESS, __('Jobs successfully scheduled'));
+        return [
+            new Job(
+                '0 0 * * *',
+                new DateTime('now', new DateTimeZone('utc')),
+                SchedulerHelper::class,
+                ['removeExpiredJobs', false]
+            )
+        ];
     }
 }

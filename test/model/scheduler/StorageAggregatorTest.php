@@ -137,7 +137,7 @@ class StorageAggregatorTest extends TestCase
         $serviceLocator = $this->getLocatorMock();
 
         $rdsStorage = new SchedulerRdsStorage('test_scheduler');
-        $cacheStorage = new SchedulerCacheStorage();
+        $cacheStorage = new SchedulerConfigStorage();
         $rdsStorage->setServiceLocator($serviceLocator);
         $cacheStorage->setServiceLocator($serviceLocator);
         $storageAggregator = new StorageAggregator($rdsStorage, $cacheStorage);

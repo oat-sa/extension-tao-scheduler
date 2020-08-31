@@ -176,6 +176,14 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function refreshJobs(): bool
+    {
+        return true;
+    }
+
+    /**
      * @return string
      */
     public function __toPhpCode()

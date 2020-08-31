@@ -26,7 +26,7 @@ use oat\oatbox\extension\AbstractAction;
 use common_report_Report;
 use oat\oatbox\service\ServiceNotFoundException;
 use oat\taoScheduler\model\inspector\RdsActionInspector;
-use oat\taoScheduler\model\scheduler\SchedulerCacheStorage;
+use oat\taoScheduler\model\scheduler\SchedulerConfigStorage;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\taoScheduler\model\scheduler\StorageAggregator;
@@ -52,7 +52,7 @@ class RegisterRdsStorage extends AbstractAction
                 SchedulerService::OPTION_JOBS_STORAGE => StorageAggregator::class,
                 SchedulerService::OPTION_JOBS_STORAGE_PARAMS => [
                     new SchedulerRdsStorage('default'),
-                    new SchedulerCacheStorage(),
+                    new SchedulerConfigStorage(),
                 ],
             ]);
         }

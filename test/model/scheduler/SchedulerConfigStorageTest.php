@@ -35,7 +35,7 @@ use DateTime;
  * @package oat\taoScheduler\model\scheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerCacheStorageTest extends TestCase
+class SchedulerConfigStorageTest extends TestCase
 {
     public function testAdd()
     {
@@ -118,11 +118,11 @@ class SchedulerCacheStorageTest extends TestCase
     }
 
     /**
-     * @return SchedulerCacheStorage
+     * @return SchedulerConfigStorage
      */
     private function getStorage()
     {
-        $storage = new SchedulerCacheStorage();
+        $storage = new SchedulerConfigStorage();
         $storage->setServiceLocator($this->getLocatorMock());
         return $storage;
     }

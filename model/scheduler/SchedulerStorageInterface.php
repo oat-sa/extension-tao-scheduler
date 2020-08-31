@@ -57,4 +57,9 @@ interface SchedulerStorageInterface extends ServiceLocatorAwareInterface, PhpSer
      * @return mixed
      */
     public function install();
+
+    /**
+     * @return boolean
+     */
+    public function refreshJobs():bool;
 }

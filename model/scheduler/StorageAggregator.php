@@ -24,6 +24,7 @@ namespace oat\taoScheduler\model\scheduler;
 use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\SchedulerException;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Class StorageAggregator
@@ -31,26 +32,28 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  */
 class StorageAggregator implements SchedulerStorageInterface
 {
-    use ServiceLocatorAwareTrait;
+    use ServiceLocatorAwareTrait {
+        setServiceLocator as traitSetServiceLocator;
+    }
     /**
      * @var SchedulerStorageInterface
      */
-    private $permanentStorage;
+    private $dynamicStorage;
 
     /**
      * @var SchedulerStorageInterface
      */
-    private $cacheStorage;
+    private $configStorage;
 
     /**
      * StorageAggregator constructor.
-     * @param SchedulerStorageInterface $permanentStorage
-     * @param SchedulerStorageInterface $cacheStorage
+     * @param SchedulerStorageInterface $dynamicStorage
+     * @param SchedulerStorageInterface $configStorage
      */
-    public function __construct(SchedulerStorageInterface $permanentStorage, SchedulerStorageInterface $cacheStorage)
+    public function __construct(SchedulerStorageInterface $dynamicStorage, SchedulerStorageInterface $configStorage)
     {
-        $this->permanentStorage = $permanentStorage;
-        $this->cacheStorage = $cacheStorage;
+        $this->dynamicStorage = $dynamicStorage;
+        $this->configStorage = $configStorage;
     }
 
     /**
@@ -59,9 +62,9 @@ class StorageAggregator implements SchedulerStorageInterface
     public function add(JobInterface $job, $permanent = true)
     {
         if ($permanent) {
-            return $this->permanentStorage->add($job);
+            return $this->dynamicStorage->add($job);
         } else {
-            return $this->cacheStorage->add($job);
+            return $this->configStorage->add($job);
         }
     }
 
@@ -71,10 +74,10 @@ class StorageAggregator implements SchedulerStorageInterface
     public function remove(JobInterface $job)
     {
         try {
-            $result = $this->cacheStorage->remove($job);
+            $result = $this->dynamicStorage->remove($job);
         } catch (SchedulerException $e) {
             try {
-                $result =  $this->permanentStorage->remove($job);
+                $result = $this->configStorage->remove($job);
             } catch (SchedulerException $e) {
                 throw new SchedulerException('Job does not exist');
             }
@@ -87,7 +90,7 @@ class StorageAggregator implements SchedulerStorageInterface
      */
     public function getJobs()
     {
-        return array_merge($this->permanentStorage->getJobs(), $this->cacheStorage->getJobs());
+        return array_merge($this->dynamicStorage->getJobs(), $this->configStorage->getJobs());
     }
 
     /**
@@ -97,11 +100,29 @@ class StorageAggregator implements SchedulerStorageInterface
      */
     public function install()
     {
-        $this->permanentStorage->setServiceLocator($this->getServiceLocator());
-        $this->cacheStorage->setServiceLocator($this->getServiceLocator());
-        $this->permanentStorage->install();
-        $this->cacheStorage->install();
+        $this->dynamicStorage->setServiceLocator($this->getServiceLocator());
+        $this->configStorage->setServiceLocator($this->getServiceLocator());
+        $this->dynamicStorage->install();
+        $this->configStorage->install();
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('Scheduler storage aggregator installed'));
+    }
+
+    /**
+     * @return bool
+     */
+    public function refreshJobs(): bool
+    {
+        return $this->dynamicStorage->refreshJobs() && $this->configStorage->refreshJobs();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->traitSetServiceLocator($serviceLocator);
+        $this->dynamicStorage->setServiceLocator($serviceLocator);
+        $this->configStorage->setServiceLocator($serviceLocator);
     }
 
     /**
@@ -111,8 +132,8 @@ class StorageAggregator implements SchedulerStorageInterface
     public function __toPhpCode()
     {
         return 'new ' . get_class($this) . '(' . PHP_EOL
-            . \common_Utils::toHumanReadablePhpString($this->permanentStorage) . ', ' . PHP_EOL
-            . \common_Utils::toHumanReadablePhpString($this->cacheStorageStorage) . PHP_EOL
+            . \common_Utils::toHumanReadablePhpString($this->dynamicStorage) . ', ' . PHP_EOL
+            . \common_Utils::toHumanReadablePhpString($this->configStorage) . PHP_EOL
             . ')';
     }
 }

@@ -36,8 +36,7 @@ return [
     ],
     'install' => [
         'php' => [
-            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
-            \oat\taoScheduler\scripts\install\RegisterJobs::class,
+            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class
         ]
     ],
     'uninstall' => [
@@ -56,5 +55,6 @@ return [
     ],
     'extra' => [
         'structures' => __DIR__.DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
+        'scheduledJobs' => \oat\taoScheduler\scripts\install\JobsConfig::class,
     ],
 ];

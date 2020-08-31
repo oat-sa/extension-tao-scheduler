@@ -123,6 +123,14 @@ class SchedulerService extends ConfigurableService implements SchedulerServiceIn
     }
 
     /**
+     * @inheritDoc
+     */
+    public function refreshJobs():bool
+    {
+        return $this->getStorage()->refreshJobs();
+    }
+
+    /**
      * @param $callable
      * @param $params
      * @return Action
