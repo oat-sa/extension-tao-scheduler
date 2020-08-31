@@ -36,7 +36,8 @@ return [
     ],
     'install' => [
         'php' => [
-            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class
+            \oat\taoScheduler\scripts\install\RegisterRdsStorage::class,
+            \oat\taoScheduler\scripts\install\RegisterEvents::class,
         ]
     ],
     'uninstall' => [
