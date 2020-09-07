@@ -23,7 +23,7 @@ namespace oat\taoScheduler\test\model\scheduler;
 use oat\taoScheduler\model\job\Job;
 use DateTime;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\test\TestCase;
 use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\SchedulerException;
 
@@ -32,7 +32,7 @@ use oat\taoScheduler\model\SchedulerException;
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
+class SchedulerRdsStorageTest extends TestCase
 {
     private $persistence;
     private $service;

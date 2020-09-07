@@ -27,14 +27,14 @@ use oat\taoScheduler\model\runner\JobRunnerPeriod;
 use oat\oatbox\service\ServiceManager;
 use common_report_Report;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\test\TestCase;
 
 /**
  * Class JobRunnerServiceTest
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class JobRunnerServiceTest extends TaoPhpUnitTestRunner
+class JobRunnerServiceTest extends TestCase
 {
 
     public function testRun()

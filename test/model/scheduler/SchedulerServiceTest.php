@@ -25,7 +25,7 @@ use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\action\ActionInterface;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\test\TestCase;
 use oat\oatbox\action\Action as TaoAction;
 
 /**
@@ -33,7 +33,7 @@ use oat\oatbox\action\Action as TaoAction;
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerServiceTest extends TaoPhpUnitTestRunner
+class SchedulerServiceTest extends TestCase
 {
 
     protected function tearDown(): void
