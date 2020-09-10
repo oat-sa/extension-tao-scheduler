@@ -48,7 +48,7 @@ class SchedulerConfigStorageTest extends TestCase
         $this->assertTrue($job->equals($storage->getJobs()[0]));
     }
 
-    public function testAddException()
+    public function testAddThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
@@ -78,7 +78,7 @@ class SchedulerConfigStorageTest extends TestCase
         $this->assertEquals(0, count($storage->getJobs()));
     }
 
-    public function testRemoveException()
+    public function testRemoveThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
