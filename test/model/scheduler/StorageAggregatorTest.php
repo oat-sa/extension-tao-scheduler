@@ -59,7 +59,7 @@ class StorageAggregatorTest extends TestCase
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $job = new Job('* * * * *', new DateTime('now'), $callbackMock);
         $storage->add($job);
@@ -89,7 +89,7 @@ class StorageAggregatorTest extends TestCase
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $job = new Job('* * * * *', new DateTime('now'), $callbackMock);
         //Attempt to remove nonexistent job

@@ -112,7 +112,7 @@ class JobRunnerServiceTest extends TestCase
         RdsActionInspector::initDatabase($persistence);
 
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $callbackMock->expects($this->any())
             ->method('myCallBack')
@@ -120,7 +120,7 @@ class JobRunnerServiceTest extends TestCase
         $callbackMock->method('myCallBack')->will($this->returnValue(true));
 
         $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $errorCallbackMock->expects($this->any())
             ->method('myCallBack')
