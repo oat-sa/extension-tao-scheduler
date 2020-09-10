@@ -61,7 +61,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $data = [
             self::COLUMN_JOB => $json
         ];
-        if ($this->isExists($job)) {
+        if ($this->exists($job)) {
             throw new SchedulerException('Job already exists');
         }
         return $this->getPersistence()->insert(self::TABLE_NAME, $data) === 1;
@@ -73,7 +73,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     public function remove(JobInterface $job)
     {
         $json = json_encode($job);
-        if (!$this->isExists($job)) {
+        if (!$this->exists($job)) {
             throw new SchedulerException('Job does not exist');
         }
         $queryBuilder = $this->getPersistence()->getPlatForm()->getQueryBuilder();
@@ -114,7 +114,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
      * @param JobInterface $job
      * @return bool
      */
-    private function isExists(JobInterface $job)
+    private function exists(JobInterface $job)
     {
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder->select('*');

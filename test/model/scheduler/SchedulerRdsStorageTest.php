@@ -45,18 +45,15 @@ class SchedulerRdsStorageTest extends TestCase
         $this->assertEquals(0, count($storage->getJobs()));
         $this->assertTrue($storage->add($job));
         $this->assertEquals(1, count($storage->getJobs()));
-        $this->assertEquals($job->getParams(), $storage->getJobs()[0]->getParams());
-        $this->assertEquals($job->getStartTime(), $storage->getJobs()[0]->getStartTime());
-        $this->assertEquals($job->getRRule(), $storage->getJobs()[0]->getRRule());
-        $this->assertEquals($job->getCallable(), $storage->getJobs()[0]->getCallable());
+        $this->assertTrue($job->equals($storage->getJobs()[0]));
     }
 
-    public function testAddException()
+    public function testAddThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $job = new Job('* * * * *', new DateTime('now'), $callbackMock);
         $storage->add($job);
@@ -76,20 +73,17 @@ class SchedulerRdsStorageTest extends TestCase
         $this->assertEquals(2, count($storage->getJobs()));
         $this->assertTrue($storage->remove($job2));
         $this->assertEquals(1, count($storage->getJobs()));
-        $this->assertEquals($job1->getParams(), $storage->getJobs()[0]->getParams());
-        $this->assertEquals($job1->getStartTime(), $storage->getJobs()[0]->getStartTime());
-        $this->assertEquals($job1->getRRule(), $storage->getJobs()[0]->getRRule());
-        $this->assertEquals($job1->getCallable(), $storage->getJobs()[0]->getCallable());
+        $this->assertTrue($job1->equals($storage->getJobs()[0]));
         $this->assertTrue($storage->remove($job1));
         $this->assertEquals(0, count($storage->getJobs()));
     }
 
-    public function testRemoveException()
+    public function testRemoveThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $job = new Job('* * * * *', new DateTime('now'), $callbackMock);
         //Attempt to remove nonexistent job

@@ -64,11 +64,12 @@ final class Version202008311040343488_taoScheduler extends AbstractMigration
         $this->getServiceManager()->register(SchedulerService::SERVICE_ID, $schedulerService);
 
         //attach config job to RDS storage
-        $schedulerService->attach(new Job(
+        $schedulerService->attach(
             '0 0 * * *',
-            new DateTime('now', new DateTimeZone('utc')),
-            SchedulerHelper::class, ['removeExpiredJobs', false]
-        ));
+            new \DateTime('now', new \DateTimeZone('utc')),
+            SchedulerHelper::class,
+            ['removeExpiredJobs', false]
+        );
 
     }
 }

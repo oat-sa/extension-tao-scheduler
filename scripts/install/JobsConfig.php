@@ -27,7 +27,7 @@ use DateTime;
 use DateTimeZone;
 use oat\taoScheduler\model\job\Job;
 /**
- * Class RegisterJobs
+ * Class JobsConfig
  * @package oat\taoScheduler\scripts\install
  */
 class JobsConfig implements JobsConfigInterface

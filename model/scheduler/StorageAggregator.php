@@ -59,9 +59,9 @@ class StorageAggregator implements SchedulerStorageInterface
     /**
      * @inheritDoc
      */
-    public function add(JobInterface $job, $permanent = true)
+    public function add(JobInterface $job, $dynamic = true)
     {
-        if ($permanent) {
+        if ($dynamic) {
             return $this->dynamicStorage->add($job);
         } else {
             return $this->configStorage->add($job);

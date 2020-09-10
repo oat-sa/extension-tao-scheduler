@@ -54,7 +54,7 @@ class SchedulerConfigStorage implements SchedulerStorageInterface
     public function add(JobInterface $job)
     {
         $jobToAdd = json_encode($job);
-        if ($this->isExists($job)) {
+        if ($this->exists($job)) {
             throw new SchedulerException('Job already exists');
         }
 
@@ -69,7 +69,7 @@ class SchedulerConfigStorage implements SchedulerStorageInterface
     public function remove(JobInterface $job)
     {
         $jobToDelete = json_encode($job);
-        if (!$this->isExists($job)) {
+        if (!$this->exists($job)) {
             throw new SchedulerException('Job does not exist');
         }
 
@@ -96,7 +96,7 @@ class SchedulerConfigStorage implements SchedulerStorageInterface
      * @param JobInterface $job
      * @return bool
      */
-    private function isExists(JobInterface $job)
+    private function exists(JobInterface $job)
     {
         $jobs = $this->getEncodedJobs();
         return in_array(json_encode($job), $jobs);
@@ -131,11 +131,12 @@ class SchedulerConfigStorage implements SchedulerStorageInterface
         /** @var Extension $extension */
         foreach ($extManager->getInstalledExtensions() as $extension) {
             $jobsConfigClass = $extension->getManifest()->getExtra()[self::MANIFEST_KEY] ?? null;
-            if ($jobsConfigClass && is_subclass_of($jobsConfigClass, JobsConfig::class)) {
-                $jobsConfig = new $jobsConfigClass();
-                foreach ($jobsConfig->getJobs() as $job) {
-                    $this->add($job);
-                }
+            if (!is_subclass_of($jobsConfigClass, JobsConfig::class)) {
+                throw new SchedulerException(sprintf('Jobs config must extend %s interface', JobsConfig::class));
+            }
+            $jobsConfig = new $jobsConfigClass();
+            foreach ($jobsConfig->getJobs() as $job) {
+                $this->add($job);
             }
         }
         return true;
