@@ -54,7 +54,7 @@ class StorageAggregatorTest extends TestCase
         $this->assertEquals(2, count($storage->getJobs()));
     }
 
-    public function testAddThrowsException()
+    public function testAddSameJobThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
@@ -84,7 +84,7 @@ class StorageAggregatorTest extends TestCase
         $this->assertEquals(0, count($storage->getJobs()));
     }
 
-    public function testRemoveThrowsException()
+    public function testRemoveNonExistentJobThrowsException()
     {
         $this->expectException(SchedulerException::class);
         $storage = $this->getStorage();
