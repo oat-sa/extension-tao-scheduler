@@ -23,13 +23,7 @@ return [
     'label' => 'Job Scheduler',
     'description' => 'TAO job scheduler',
     'license' => 'GPL-2.0',
-    'version' => '2.3.0',
     'author' => 'Open Assessment Technologies SA',
-    'requires' => [
-        'generis' => '>=12.15.0',
-        'tao' => '>=15.10.0',
-        'taoTaskQueue' => '>=1.2.0'
-    ],
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSchedulerManager',
     'acl' => [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSchedulerManager', ['ext'=>'taoScheduler']],
