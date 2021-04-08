@@ -20,15 +20,17 @@
 
 namespace oat\taoScheduler\model\scheduler;
 
-use \oat\taoScheduler\model\job\JobInterface;
+use oat\taoScheduler\model\job\JobInterface;
+use oat\taoScheduler\model\SchedulerException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use oat\oatbox\PhpSerializable;
 
 /**
  * Interface SchedulerStorageInterface
  * @package oat\taoScheduler\model\scheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-interface SchedulerStorageInterface extends ServiceLocatorAwareInterface
+interface SchedulerStorageInterface extends ServiceLocatorAwareInterface, PhpSerializable
 {
 
     /**
@@ -42,6 +44,7 @@ interface SchedulerStorageInterface extends ServiceLocatorAwareInterface
      * Remove job from storage
      * @param JobInterface $job
      * @return boolean
+     * @throws SchedulerException if job does not exist
      */
     public function remove(JobInterface $job);
 
@@ -51,8 +54,12 @@ interface SchedulerStorageInterface extends ServiceLocatorAwareInterface
     public function getJobs();
 
     /**
-     * @param $persistence
      * @return mixed
      */
-    public static function install($persistence);
+    public function install();
+
+    /**
+     * @return boolean
+     */
+    public function refreshJobs():bool;
 }

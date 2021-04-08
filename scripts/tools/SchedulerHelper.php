@@ -23,6 +23,7 @@ namespace oat\taoScheduler\scripts\tools;
 use oat\oatbox\extension\AbstractAction;
 use DateTime;
 use oat\oatbox\log\LoggerAwareTrait;
+use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\scheduler\SchedulerServiceInterface as TaoScheduler;
 use common_report_Report as Report;
 use oat\taoScheduler\model\runner\JobRunnerService;
@@ -39,7 +40,7 @@ class SchedulerHelper extends AbstractAction
 {
     use LoggerAwareTrait;
 
-    private static $validMethods = ['show', 'removeExpiredJobs'];
+    private static $validMethods = ['show', 'getJobs',  'removeExpiredJobs'];
 
     /** @var array */
     private $params;
@@ -106,6 +107,26 @@ class SchedulerHelper extends AbstractAction
         }
 
         $report->add(new Report(Report::TYPE_INFO, $count . ' tasks scheduled'));
+        return $report;
+    }
+
+    public function getJobs()
+    {
+        /** @var JobInterface[] $jobs */
+        $jobs = $this->getServiceLocator()->get(TaoScheduler::SERVICE_ID)->getJobs();
+        $report = new Report(Report::TYPE_INFO, 'Scheduled Jobs:');
+        foreach ($jobs as $key => $job) {
+            $report->add(
+                new Report(
+                    Report::TYPE_INFO,
+                    'Job #' . ($key+1) . ':' . PHP_EOL .
+                    '  Execution Time: ' . $job->getStartTime()->format(DateTime::ISO8601) . PHP_EOL .
+                    '  Recurrence rule: ' . $job->getRRule() . PHP_EOL .
+                    '  Callback: ' . \common_Utils::toPHPVariableString($job->getCallable()) . PHP_EOL .
+                    '  Params: ' . \common_Utils::toPHPVariableString($job->getParams()) . PHP_EOL
+                )
+            );
+        }
         return $report;
     }
 

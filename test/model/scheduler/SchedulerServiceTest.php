@@ -20,11 +20,12 @@
 namespace oat\taoScheduler\test\model\scheduler;
 
 use DateTime;
+use oat\generis\persistence\PersistenceManager;
 use oat\taoScheduler\model\scheduler\SchedulerService;
 use oat\oatbox\service\ServiceManager;
 use oat\taoScheduler\model\action\ActionInterface;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\test\TestCase;
 use oat\oatbox\action\Action as TaoAction;
 
 /**
@@ -32,7 +33,7 @@ use oat\oatbox\action\Action as TaoAction;
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class SchedulerServiceTest extends TaoPhpUnitTestRunner
+class SchedulerServiceTest extends TestCase
 {
 
     protected function tearDown(): void
@@ -192,12 +193,13 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         ]);
 
         $persistenceManager = $this->getSqlMock('test_scheduler');
-        $persistence = $persistenceManager->getPersistenceById('test_scheduler');
-        SchedulerRdsStorage::install($persistence);
+        $schedulerRdsStorage = new SchedulerRdsStorage('test_scheduler');
         $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
-        $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
+        $config->set(PersistenceManager::SERVICE_ID, $persistenceManager);
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
+        $schedulerRdsStorage->setServiceLocator($serviceManager);
+        $schedulerRdsStorage->install();
         return $scheduler;
     }
 }

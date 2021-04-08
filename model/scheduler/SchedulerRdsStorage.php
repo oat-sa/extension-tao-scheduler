@@ -20,6 +20,7 @@
 
 namespace oat\taoScheduler\model\scheduler;
 
+use oat\generis\persistence\PersistenceManager;
 use oat\taoScheduler\model\job\JobInterface;
 use oat\taoScheduler\model\job\Job;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -60,7 +61,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $data = [
             self::COLUMN_JOB => $json
         ];
-        if ($this->isExists($job)) {
+        if ($this->exists($job)) {
             throw new SchedulerException('Job already exists');
         }
         return $this->getPersistence()->insert(self::TABLE_NAME, $data) === 1;
@@ -72,7 +73,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     public function remove(JobInterface $job)
     {
         $json = json_encode($job);
-        if (!$this->isExists($job)) {
+        if (!$this->exists($job)) {
             throw new SchedulerException('Job does not exist');
         }
         $queryBuilder = $this->getPersistence()->getPlatForm()->getQueryBuilder();
@@ -101,11 +102,19 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     }
 
     /**
+     * @return string
+     */
+    public function getPersistenceId()
+    {
+        return $this->persistenceId;
+    }
+
+    /**
      * Check if job exists in the storage
      * @param JobInterface $job
      * @return bool
      */
-    private function isExists(JobInterface $job)
+    private function exists(JobInterface $job)
     {
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder->select('*');
@@ -139,11 +148,12 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
     /**
      * Initialize log storage
      *
-     * @param \common_persistence_Persistence $persistence
      * @return \common_report_Report
      */
-    public static function install($persistence)
+    public function install()
     {
+        $persistence = $this->getServiceLocator()->get(PersistenceManager::SERVICE_ID)
+            ->getPersistenceById($this->persistenceId);
         $schemaManager = $persistence->getDriver()->getSchemaManager();
         $schema = $schemaManager->createSchema();
         $fromSchema = clone $schema;
@@ -163,5 +173,21 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         }
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('RDS scheduler storage successfully installed'));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function refreshJobs(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toPhpCode()
+    {
+        return 'new ' . get_class($this) . '(\'' . $this->persistenceId . '\')';
     }
 }

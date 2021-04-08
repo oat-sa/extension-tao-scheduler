@@ -27,14 +27,14 @@ use oat\taoScheduler\model\runner\JobRunnerPeriod;
 use oat\oatbox\service\ServiceManager;
 use common_report_Report;
 use oat\taoScheduler\model\scheduler\SchedulerRdsStorage;
-use oat\tao\test\TaoPhpUnitTestRunner;
+use oat\generis\test\TestCase;
 
 /**
  * Class JobRunnerServiceTest
  * @package oat\taoScheduler
  * @author Aleh Hutnikau, <hutnikau@1pt.com>
  */
-class JobRunnerServiceTest extends TaoPhpUnitTestRunner
+class JobRunnerServiceTest extends TestCase
 {
 
     public function testRun()
@@ -109,11 +109,10 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
 
         $persistenceManager = $this->getSqlMock('test_scheduler');
         $persistence = $persistenceManager->getPersistenceById('test_scheduler');
-        SchedulerRdsStorage::install($persistence);
         RdsActionInspector::initDatabase($persistence);
 
         $callbackMock = $this->getMockBuilder('\stdClass')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $callbackMock->expects($this->any())
             ->method('myCallBack')
@@ -121,7 +120,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $callbackMock->method('myCallBack')->will($this->returnValue(true));
 
         $errorCallbackMock = $this->getMockBuilder('\oat\oatbox\service\ConfigurableService')
-            ->setMethods(['myCallBack'])
+            ->addMethods(['myCallBack'])
             ->getMock();
         $errorCallbackMock->expects($this->any())
             ->method('myCallBack')
@@ -154,6 +153,9 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $config->set('errorcallback/mock', $errorCallbackMock);
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
+        $schedulerRdsStorage = new SchedulerRdsStorage('test_scheduler');
+        $schedulerRdsStorage->setServiceLocator($serviceManager);
+        $schedulerRdsStorage->install();
         return $serviceManager;
     }
 

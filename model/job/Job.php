@@ -171,4 +171,15 @@ class Job implements JobInterface
         ];
         return $arr;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function equals(JobInterface $job): bool
+    {
+        return $this->getRRule() === $job->getRRule() &&
+            $this->getStartTime()->getTimestamp() === $job->getStartTime()->getTimestamp() &&
+            $this->getParams() === $job->getParams() &&
+            $this->getCallable() === $job->getCallable();
+    }
 }

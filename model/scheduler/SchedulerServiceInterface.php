@@ -86,4 +86,9 @@ interface SchedulerServiceInterface
      * @return DateTimeInterface|null
      */
     public function getNextRecurrence(Job $job, DateTimeInterface $after);
+
+    /**
+     * @return boolean
+     */
+    public function refreshJobs():bool;
 }

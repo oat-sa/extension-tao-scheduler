@@ -51,6 +51,13 @@ interface JobInterface extends PhpSerializable, \JsonSerializable
     public function getParams();
 
     /**
+     * Check if jobs are equal
+     * @param JobInterface $job
+     * @return bool
+     */
+    public function equals(JobInterface $job):bool;
+
+    /**
      * Restore Job from json
      * @param string $json
      * @return JobInterface

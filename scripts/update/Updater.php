@@ -30,6 +30,7 @@ use oat\taoScheduler\scripts\tools\SchedulerHelper;
 use oat\taoScheduler\scripts\update\dbMigrations\Version20190422114045;
 use DateTime;
 use DateTimeZone;
+use common_report_Report as Report;
 
 /**
  * Class Updater
@@ -115,5 +116,17 @@ class Updater extends common_ext_ExtensionUpdater
         //See: https://github.com/oat-sa/generis/wiki/Tao-Update-Process
 
         $this->setVersion($this->getExtension()->getManifest()->getVersion());
+    }
+
+    /**
+     * @return Report|null
+     * @throws \common_Exception
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
+    public function postUpdate(): ?Report
+    {
+        parent::postUpdate();
+        $this->getServiceLocator()->get(SchedulerService::SERVICE_ID)->refreshJobs();
+        return new Report(Report::TYPE_SUCCESS, 'taoScheduler: Scheduled jobs were updated');
     }
 }
