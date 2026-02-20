@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +18,7 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA (under the project TAO-PRODUCT);
  *
  */
+
 namespace oat\taoScheduler\test\model\scheduler;
 
 use DateTime;
@@ -34,7 +36,6 @@ use oat\oatbox\action\Action as TaoAction;
  */
 class SchedulerServiceTest extends TaoPhpUnitTestRunner
 {
-
     protected function tearDown(): void
     {
         $dir = __DIR__ . DIRECTORY_SEPARATOR . 'cache';
@@ -130,7 +131,7 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $recurrences = $scheduler->getRecurrences($job, $dt, $dtPlus5Minutes);
         $this->assertEquals(6, count($recurrences));
         $this->assertEquals($dt, $recurrences[0]);
-        $this->assertEquals($dt->getTimestamp()+60, $recurrences[1]->getTimestamp());
+        $this->assertEquals($dt->getTimestamp() + 60, $recurrences[1]->getTimestamp());
         $this->assertEquals($dtPlus5Minutes, $recurrences[5]);
 
 
@@ -147,8 +148,8 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $recurrences = $scheduler->getRecurrences($job, $dt, $dtPlus5Minutes);
         $this->assertEquals(3, count($recurrences));
         $this->assertEquals($dt, $recurrences[0]);
-        $this->assertEquals($dt->getTimestamp()+60, $recurrences[1]->getTimestamp());
-        $this->assertEquals($dt->getTimestamp()+120, $recurrences[2]->getTimestamp());
+        $this->assertEquals($dt->getTimestamp() + 60, $recurrences[1]->getTimestamp());
+        $this->assertEquals($dt->getTimestamp() + 120, $recurrences[2]->getTimestamp());
     }
 
     public function testGetNextRecurrence()
@@ -165,17 +166,32 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $job = $scheduler->getJobs()[0];
 
         $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dt)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp()+60, $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp());
+        $this->assertEquals(
+            $dt->getTimestamp(),
+            $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 60,
+            $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp()
+        );
 
         $scheduler->attach('FREQ=MINUTELY;COUNT=3', $dt, 'foo/bar');
 
         $job = $scheduler->getJobs()[1];
 
         $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dt)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp()+60, $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp()+120, $scheduler->getNextRecurrence($job, $dtPlus120Second)->getTimestamp());
+        $this->assertEquals(
+            $dt->getTimestamp(),
+            $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 60,
+            $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 120,
+            $scheduler->getNextRecurrence($job, $dtPlus120Second)->getTimestamp()
+        );
         $this->assertEquals(null, $scheduler->getNextRecurrence($job, $dtPlus121Second));
     }
 
@@ -194,7 +210,7 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $persistenceManager = $this->getSqlMock('test_scheduler');
         $persistence = $persistenceManager->getPersistenceById('test_scheduler');
         SchedulerRdsStorage::install($persistence);
-        $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+        $config = new \common_persistence_KeyValuePersistence(new \common_persistence_InMemoryKvDriver(), []);
         $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
         $serviceManager = new ServiceManager($config);
         $scheduler->setServiceLocator($serviceManager);
