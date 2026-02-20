@@ -79,8 +79,8 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->delete(self::TABLE_NAME);
         $queryBuilder->where(self::COLUMN_JOB . ' = ?');
         $queryBuilder->setParameters([$json]);
-        $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        return $stmt->execute();
+        $this->getPersistence()->exec($queryBuilder->getSQL(), $queryBuilder->getParameters());
+        return true;
     }
 
     /**
@@ -92,7 +92,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->select('*');
         $result = [];
         $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAllAssociative();
         foreach ($data as $job) {
             //todo: retrieve jobs from factory
             $result[] = Job::restore($job[self::COLUMN_JOB]);
@@ -113,7 +113,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->setParameters([json_encode($job)]);
 
         $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAssociative();
         return !empty($data);
     }
 

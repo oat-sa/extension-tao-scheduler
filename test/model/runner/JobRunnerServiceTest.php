@@ -145,7 +145,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $persistences['test_scheduler'] = $persistence;
         $property->setValue($persistenceManager, $persistences);
 
-        $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+        $config = new \common_persistence_KeyValuePersistence(new \common_persistence_InMemoryKvDriver(), []);
         $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
         $config->set(SchedulerService::SERVICE_ID, $scheduler);
         $config->set(JobRunnerService::SERVICE_ID, $runner);

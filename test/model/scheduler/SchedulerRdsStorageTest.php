@@ -107,7 +107,7 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
             $this->persistence = $persistenceManager->getPersistenceById('test_scheduler');
             SchedulerRdsStorage::install($this->persistence);
             $this->service = new SchedulerRdsStorage('test_scheduler');
-            $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+            $config = new \common_persistence_KeyValuePersistence(new \common_persistence_InMemoryKvDriver(), []);
             $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
             $serviceManager = new ServiceManager($config);
             $this->service->setServiceLocator($serviceManager);

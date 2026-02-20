@@ -33,9 +33,9 @@
     ],
     "require": {
         "oat-sa/oatbox-extension-installer": "~1.1||dev-master",
-        "oat-sa/job-scheduler": "dev-develop as 99.99.99",
-        "oat-sa/generis": ">=15.22",
-        "oat-sa/tao-core": ">=50.24.6"
+        "oat-sa/job-scheduler": "^0.1.1",
+        "oat-sa/generis": ">=17.0.0",
+        "oat-sa/tao-core": ">=56.0.0"
     },
     "autoload": {
         "psr-4": {

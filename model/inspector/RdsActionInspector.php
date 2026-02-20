@@ -23,7 +23,6 @@ namespace oat\taoScheduler\model\inspector;
 use Scheduler\ActionInspector\RdsActionInspector as ParentRdsActionInspector;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Doctrine\DBAL\Types\Type;
 
 /**
  * Class RdsActionInspector
@@ -73,10 +72,10 @@ class RdsActionInspector extends ParentRdsActionInspector implements ServiceLoca
         $schema = $schemaManager->createSchema();
         $fromSchema = clone $schema;
         $table = $schema->createTable(self::TABLE_NAME);
-        $table->addColumn(static::COLUMN_ID, TYPE::STRING, ['length' => 255, 'notnull' => true]);
-        $table->addColumn(static::COLUMN_STATE, TYPE::STRING, ['length' => 255, 'notnull' => true]);
-        $table->addColumn(static::COLUMN_REPORT, TYPE::TEXT, ['notnull' => false]);
-        $table->addColumn(static::COLUMN_CREATED_AT, TYPE::DATETIME, ['notnull' => true]);
+        $table->addColumn(static::COLUMN_ID, 'string', ['length' => 255, 'notnull' => true]);
+        $table->addColumn(static::COLUMN_STATE, 'string', ['length' => 255, 'notnull' => true]);
+        $table->addColumn(static::COLUMN_REPORT, 'text', ['notnull' => false]);
+        $table->addColumn(static::COLUMN_CREATED_AT, 'datetime', ['notnull' => true]);
         $table->setPrimaryKey([static::COLUMN_ID]);
         $table->addIndex([static::COLUMN_ID], 'IDX_' . static::TABLE_NAME . '_' . static::COLUMN_ID);
         $queries = $persistence->getPlatForm()->getMigrateSchemaSql($fromSchema, $schema);
