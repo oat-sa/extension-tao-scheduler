@@ -25,6 +25,12 @@
         "tao-extension-name": "taoScheduler"
     },
     "minimum-stability": "dev",
+    "repositories": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/oat-sa/job-scheduler.git"
+        }
+    ],
     "require": {
         "oat-sa/oatbox-extension-installer": "~1.1||dev-master",
         "oat-sa/job-scheduler": "dev-develop as 99.99.99",
