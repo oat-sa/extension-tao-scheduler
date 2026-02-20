@@ -166,17 +166,32 @@ class SchedulerServiceTest extends TaoPhpUnitTestRunner
         $job = $scheduler->getJobs()[0];
 
         $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dt)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp() + 60, $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp());
+        $this->assertEquals(
+            $dt->getTimestamp(),
+            $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 60,
+            $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp()
+        );
 
         $scheduler->attach('FREQ=MINUTELY;COUNT=3', $dt, 'foo/bar');
 
         $job = $scheduler->getJobs()[1];
 
         $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dt)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp(), $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp() + 60, $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp());
-        $this->assertEquals($dt->getTimestamp() + 120, $scheduler->getNextRecurrence($job, $dtPlus120Second)->getTimestamp());
+        $this->assertEquals(
+            $dt->getTimestamp(),
+            $scheduler->getNextRecurrence($job, $dtMinus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 60,
+            $scheduler->getNextRecurrence($job, $dtPlus1Second)->getTimestamp()
+        );
+        $this->assertEquals(
+            $dt->getTimestamp() + 120,
+            $scheduler->getNextRecurrence($job, $dtPlus120Second)->getTimestamp()
+        );
         $this->assertEquals(null, $scheduler->getNextRecurrence($job, $dtPlus121Second));
     }
 

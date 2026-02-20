@@ -44,8 +44,18 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $schedulerService = $serviceManager->get(SchedulerService::SERVICE_ID);
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@' . $now), ['callback/mock', 'myCallBack'], ['foo']);
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@' . ($now + 2)), ['errorcallback/mock', 'myCallBack'], ['foo', 'bar']);
+        $schedulerService->attach(
+            'FREQ=MONTHLY;COUNT=1',
+            new \DateTime('@' . $now),
+            ['callback/mock', 'myCallBack'],
+            ['foo']
+        );
+        $schedulerService->attach(
+            'FREQ=MONTHLY;COUNT=1',
+            new \DateTime('@' . ($now + 2)),
+            ['errorcallback/mock', 'myCallBack'],
+            ['foo', 'bar']
+        );
 
         /** @var common_report_Report $report */
         $report = $runnerService->run(new \DateTime('@' . $now), new \DateTime('@' . ($now + 1)));

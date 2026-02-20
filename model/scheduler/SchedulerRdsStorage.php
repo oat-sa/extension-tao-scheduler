@@ -38,8 +38,8 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
 
     private $persistenceId;
 
-    const TABLE_NAME = 'scheduler_jobs';
-    const COLUMN_JOB = 'job';
+    public const TABLE_NAME = 'scheduler_jobs';
+    public const COLUMN_JOB = 'job';
 
     /**
      * SchedulerStorage constructor.
@@ -162,6 +162,9 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
             $persistence->exec($query);
         }
 
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('RDS scheduler storage successfully installed'));
+        return new \common_report_Report(
+            \common_report_Report::TYPE_SUCCESS,
+            __('RDS scheduler storage successfully installed')
+        );
     }
 }
