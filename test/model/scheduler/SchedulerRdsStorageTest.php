@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +41,7 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
     public function testAdd()
     {
         $storage = $this->getStorage();
-        $job = new Job('* * * * *', new DateTime('@'.time()), 'time', ['foo', 'bar']);
+        $job = new Job('* * * * *', new DateTime('@' . time()), 'time', ['foo', 'bar']);
 
         $this->assertEquals(0, count($storage->getJobs()));
         $this->assertTrue($storage->add($job));
@@ -67,8 +68,8 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
     public function testRemove()
     {
         $storage = $this->getStorage();
-        $job1 = new Job('* * * * *', new DateTime('@'.time()), 'time', ['foo', 'bar']);
-        $job2 = new Job('* 2 * * *', new DateTime('@'.time()), 'time', ['foo', 'bar']);
+        $job1 = new Job('* * * * *', new DateTime('@' . time()), 'time', ['foo', 'bar']);
+        $job2 = new Job('* 2 * * *', new DateTime('@' . time()), 'time', ['foo', 'bar']);
 
         $this->assertEquals(0, count($storage->getJobs()));
         $this->assertTrue($storage->add($job1));
@@ -107,7 +108,7 @@ class SchedulerRdsStorageTest extends TaoPhpUnitTestRunner
             $this->persistence = $persistenceManager->getPersistenceById('test_scheduler');
             SchedulerRdsStorage::install($this->persistence);
             $this->service = new SchedulerRdsStorage('test_scheduler');
-            $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+            $config = new \common_persistence_KeyValuePersistence(new \common_persistence_InMemoryKvDriver(), []);
             $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
             $serviceManager = new ServiceManager($config);
             $this->service->setServiceLocator($serviceManager);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,7 +37,6 @@ use oat\tao\test\TaoPhpUnitTestRunner;
  */
 class JobRunnerServiceTest extends TaoPhpUnitTestRunner
 {
-
     public function testRun()
     {
         $now = time();
@@ -44,32 +44,42 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $schedulerService = $serviceManager->get(SchedulerService::SERVICE_ID);
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), ['callback/mock', 'myCallBack'], ['foo']);
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.($now+2)), ['errorcallback/mock', 'myCallBack'], ['foo', 'bar']);
+        $schedulerService->attach(
+            'FREQ=MONTHLY;COUNT=1',
+            new \DateTime('@' . $now),
+            ['callback/mock', 'myCallBack'],
+            ['foo']
+        );
+        $schedulerService->attach(
+            'FREQ=MONTHLY;COUNT=1',
+            new \DateTime('@' . ($now + 2)),
+            ['errorcallback/mock', 'myCallBack'],
+            ['foo', 'bar']
+        );
 
         /** @var common_report_Report $report */
-        $report = $runnerService->run(new \DateTime('@'.$now), new \DateTime('@'.($now+1)));
+        $report = $runnerService->run(new \DateTime('@' . $now), new \DateTime('@' . ($now + 1)));
         $this->assertEquals(1, count($report->getSuccesses()));
         $this->assertEquals(0, count($report->getErrors()));
 
-        $report = $runnerService->run(new \DateTime('@'.($now+2)), new \DateTime('@'.($now+3)));
+        $report = $runnerService->run(new \DateTime('@' . ($now + 2)), new \DateTime('@' . ($now + 3)));
         $this->assertEquals(1, count($report->getErrors()));
         $this->assertEquals(0, count($report->getSuccesses()));
 
 
         //test cron job syntax
-        $dt10minAgo = new \DateTime('@'.($now-(10*60)));
+        $dt10minAgo = new \DateTime('@' . ($now - (10 * 60)));
         $dt10minAgo->setTime($dt10minAgo->format('G'), $dt10minAgo->format('i'), 0, 0);
         $schedulerService->attach('* * * * *', $dt10minAgo, ['callback/mock', 'myCallBack'], ['foo']);
 
-        $dt8minAgo = new \DateTime('@'.(($dt10minAgo->getTimestamp()+(2*60))));
+        $dt8minAgo = new \DateTime('@' . (($dt10minAgo->getTimestamp() + (2 * 60))));
 
         $report = $runnerService->run($dt10minAgo, $dt8minAgo);
         $this->assertEquals(3, count($report->getSuccesses()));
         $this->assertEquals(0, count($report->getErrors()));
 
         //try to run already performed actions
-        $report = $runnerService->run(new \DateTime('@'.($now)), new \DateTime('@'.($now+3)));
+        $report = $runnerService->run(new \DateTime('@' . ($now)), new \DateTime('@' . ($now + 3)));
         $this->assertEquals(0, count($report->getErrors()));
         $this->assertEquals(0, count($report->getSuccesses()));
     }
@@ -83,13 +93,13 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         /** @var JobRunnerService $runnerService */
         $runnerService = $serviceManager->get(JobRunnerService::SERVICE_ID);
 
-        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@'.$now), ['callback/mock', 'myCallBack']);
+        $schedulerService->attach('FREQ=MONTHLY;COUNT=1', new \DateTime('@' . $now), ['callback/mock', 'myCallBack']);
 
-        $runnerService->run(new \DateTime('@'.$now), new \DateTime('@'.($now+1)));
+        $runnerService->run(new \DateTime('@' . $now), new \DateTime('@' . ($now + 1)));
         $lastLaunchPeriod = $runnerService->getLastLaunchPeriod();
         $this->assertTrue($lastLaunchPeriod instanceof JobRunnerPeriod);
         $this->assertEquals($now, $lastLaunchPeriod->getFrom()->getTimestamp());
-        $this->assertEquals($now+1, $lastLaunchPeriod->getTo()->getTimestamp());
+        $this->assertEquals($now + 1, $lastLaunchPeriod->getTo()->getTimestamp());
     }
 
     /**
@@ -145,7 +155,7 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $persistences['test_scheduler'] = $persistence;
         $property->setValue($persistenceManager, $persistences);
 
-        $config = new \common_persistence_KeyValuePersistence([], new \common_persistence_InMemoryKvDriver());
+        $config = new \common_persistence_KeyValuePersistence(new \common_persistence_InMemoryKvDriver(), []);
         $config->set(\common_persistence_Manager::SERVICE_ID, $persistenceManager);
         $config->set(SchedulerService::SERVICE_ID, $scheduler);
         $config->set(JobRunnerService::SERVICE_ID, $runner);
@@ -156,5 +166,4 @@ class JobRunnerServiceTest extends TaoPhpUnitTestRunner
         $scheduler->setServiceLocator($serviceManager);
         return $serviceManager;
     }
-
 }

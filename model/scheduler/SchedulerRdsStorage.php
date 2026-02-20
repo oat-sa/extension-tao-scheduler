@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,13 +34,12 @@ use Doctrine\DBAL\Schema\SchemaException;
  */
 class SchedulerRdsStorage implements SchedulerStorageInterface
 {
-
     use ServiceLocatorAwareTrait;
 
     private $persistenceId;
 
-    const TABLE_NAME = 'scheduler_jobs';
-    const COLUMN_JOB = 'job';
+    public const TABLE_NAME = 'scheduler_jobs';
+    public const COLUMN_JOB = 'job';
 
     /**
      * SchedulerStorage constructor.
@@ -79,8 +79,8 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->delete(self::TABLE_NAME);
         $queryBuilder->where(self::COLUMN_JOB . ' = ?');
         $queryBuilder->setParameters([$json]);
-        $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        return $stmt->execute();
+        $this->getPersistence()->exec($queryBuilder->getSQL(), $queryBuilder->getParameters());
+        return true;
     }
 
     /**
@@ -92,7 +92,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->select('*');
         $result = [];
         $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAllAssociative();
         foreach ($data as $job) {
             //todo: retrieve jobs from factory
             $result[] = Job::restore($job[self::COLUMN_JOB]);
@@ -113,7 +113,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
         $queryBuilder->setParameters([json_encode($job)]);
 
         $stmt = $this->getPersistence()->query($queryBuilder->getSQL(), $queryBuilder->getParameters());
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAssociative();
         return !empty($data);
     }
 
@@ -152,7 +152,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
             $table = $schema->createTable(self::TABLE_NAME);
             $table->addOption('engine', 'InnoDB');
             $table->addColumn(static::COLUMN_JOB, "text", ["notnull" => true]);
-        } catch(SchemaException $e) {
+        } catch (SchemaException $e) {
             \common_Logger::i('Database Schema already up to date.');
         }
 
@@ -162,6 +162,9 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
             $persistence->exec($query);
         }
 
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, __('RDS scheduler storage successfully installed'));
+        return new \common_report_Report(
+            \common_report_Report::TYPE_SUCCESS,
+            __('RDS scheduler storage successfully installed')
+        );
     }
 }
