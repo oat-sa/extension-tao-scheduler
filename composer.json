@@ -27,7 +27,7 @@
     "minimum-stability": "dev",
     "require": {
         "oat-sa/oatbox-extension-installer": "~1.1||dev-master",
-        "hutnikau/job-scheduler": "~0.6.1",
+        "oat-sa/job-scheduler": "*",
         "oat-sa/generis": ">=15.22",
         "oat-sa/tao-core": ">=50.24.6"
     },
