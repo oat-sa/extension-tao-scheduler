@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,7 +32,6 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  */
 class RdsActionInspector extends ParentRdsActionInspector implements ServiceLocatorAwareInterface
 {
-
     use ServiceLocatorAwareTrait;
 
     /** @var \common_persistence_SqlPersistence */

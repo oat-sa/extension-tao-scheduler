@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,7 +34,6 @@ use Doctrine\DBAL\Schema\SchemaException;
  */
 class SchedulerRdsStorage implements SchedulerStorageInterface
 {
-
     use ServiceLocatorAwareTrait;
 
     private $persistenceId;
@@ -152,7 +152,7 @@ class SchedulerRdsStorage implements SchedulerStorageInterface
             $table = $schema->createTable(self::TABLE_NAME);
             $table->addOption('engine', 'InnoDB');
             $table->addColumn(static::COLUMN_JOB, "text", ["notnull" => true]);
-        } catch(SchemaException $e) {
+        } catch (SchemaException $e) {
             \common_Logger::i('Database Schema already up to date.');
         }
 
